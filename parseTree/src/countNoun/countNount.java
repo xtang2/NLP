@@ -2,13 +2,18 @@ package countNoun;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
+import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
@@ -16,7 +21,7 @@ import edu.stanford.nlp.trees.Tree;
 
 public class countNount {
     static String inputText = null;
-    static String[] sentences = null;
+    static List<String> sentences = new ArrayList<>();
 
     private final static String PCG_MODEL = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
 
@@ -46,16 +51,34 @@ public class countNount {
 
             Tree tree = parser.parse(sentence);
 
-            List<Tree> leaves = tree.getLeaves();
-            // Print words and Pos Tags
+            // print the tree
+            tree.pennPrint();
+
+            List<Tree> leaves = tree.getLeaves(); // Print words and Pos Tags
+
             for (Tree leaf : leaves) {
-                Tree parent = leaf.parent(tree);
-                System.out.print(leaf.label().value() + "-" + parent.label().value() + " ");
-                if (parent.label().value().equals("NNS") || parent.label().value().equals("NNP")
-                        || parent.label().value().equals("NN")) {
-                    count++;
+                // System.out.println(leaf);
+                // get the individual's parent in the tree
+                // X is Y, get X
+
+                if (leaf.parent(tree).label().value().equals("VBZ")) {
+                    Tree parent = leaf.parent(tree).parent(tree).parent(tree).firstChild();
+
+                    // System.out.println(parent.localTrees());
+                    System.out.println("What is ");
+                    System.out.println(parent.getLeaves());
                 }
+
+                // parent.label().value() + " ");
+                /*
+                 * if (parent.label().value().equals("VBZ")) {
+                 * System.out.println(leaf.label().value());
+                 * System.out.println(parent.parent(tree).firstChild());
+                 * 
+                 * }
+                 */
             }
+
             System.out.println("new sentence");
         }
         System.out.println("total count : " + count);
@@ -73,8 +96,17 @@ public class countNount {
         }
         fileContent = fileInput.useDelimiter("\\A").next();
         // insert letters into a hashtable
+        Reader reader = new StringReader(fileContent);
+        DocumentPreprocessor dp = new DocumentPreprocessor(reader);
 
-        sentences = fileContent.split("\\.");
+        for (List<HasWord> sentence : dp) {
+            // SentenceUtils not Sentence
+            String sentenceString = Sentence.listToString(sentence);
+            sentences.add(sentenceString);
+
+        }
+        // sentences.add("The Old Kingdom is the period in the third
+        // millennium.");
 
     }
 
