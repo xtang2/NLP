@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
@@ -52,7 +53,7 @@ public class countNount {
             Tree tree = parser.parse(sentence);
 
             // print the tree
-            tree.pennPrint();
+            // tree.pennPrint();
 
             List<Tree> leaves = tree.getLeaves(); // Print words and Pos Tags
 
@@ -65,8 +66,17 @@ public class countNount {
                     Tree parent = leaf.parent(tree).parent(tree).parent(tree).firstChild();
 
                     // System.out.println(parent.localTrees());
-                    System.out.println("What is ");
-                    System.out.println(parent.getLeaves());
+                    //System.out.println("What is ");
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("What is ");
+                    for (Tree t : parent.getLeaves()) {
+                        sb.append(" " + t.label().value());
+                    }
+
+                    String answer = sb.toString();
+
+                    System.out.println(answer);
                 }
 
                 // parent.label().value() + " ");
@@ -74,7 +84,7 @@ public class countNount {
                  * if (parent.label().value().equals("VBZ")) {
                  * System.out.println(leaf.label().value());
                  * System.out.println(parent.parent(tree).firstChild());
-                 * 
+                 *
                  * }
                  */
             }
@@ -94,16 +104,20 @@ public class countNount {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        fileContent = fileInput.useDelimiter("\\A").next();
-        // insert letters into a hashtable
-        Reader reader = new StringReader(fileContent);
-        DocumentPreprocessor dp = new DocumentPreprocessor(reader);
 
-        for (List<HasWord> sentence : dp) {
-            // SentenceUtils not Sentence
-            String sentenceString = Sentence.listToString(sentence);
-            sentences.add(sentenceString);
+        while (fileInput.hasNext()) {
+            fileContent = fileInput.useDelimiter(Pattern.compile("\\n")).next();
+            // insert letters into a hashtable
+            Reader reader = new StringReader(fileContent);
+            DocumentPreprocessor dp = new DocumentPreprocessor(reader);
 
+            for (List<HasWord> sentence : dp) {
+                // SentenceUtils not Sentence
+                String sentenceString = Sentence.listToString(sentence);
+                sentences.add(sentenceString);
+                //System.out.println(sentenceString);
+
+            }
         }
         // sentences.add("The Old Kingdom is the period in the third
         // millennium.");
