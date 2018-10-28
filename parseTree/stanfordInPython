@@ -1,0 +1,29 @@
+ACCESSING CORENLP IN PYTHON
+
+path_to_jar = '/Users/leonshi/libs/stanford-parser-full-2018-10-17/stanford-parser.jar'
+path_to_models_jar = '/Users/leonshi/libs/stanford-parser-full-2018-10-17/stanford-parser-3.9.2-models.jar'
+
+In coreNLP folder in Libs:
+
+java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer \
+-preload tokenize,ssplit,pos,lemma,ner,parse,depparse \
+-status_port 9000 -port 9000 -timeout 15000 & 
+
+Then run
+
+from nltk.parse.corenlp import CoreNLPParser
+from nltk.parse.corenlp import CoreNLPDependencyParser
+
+For coreNLP parser:
+parser = CoreNLPParser(url='http://localhost:9000')
+
+For dependency parser:
+dep_parser = CoreNLPDependencyParser(url='http://localhost:9000')
+
+Example:
+
+parses = dep_parser.parse('What is the airspeed of an unladen swallow ?'.split())
+
+[[(governor, dep, dependent) for governor, dep, dependent in parse.triples()] for parse in parses]
+
+
