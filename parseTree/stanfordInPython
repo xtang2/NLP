@@ -1,5 +1,8 @@
 ACCESSING CORENLP IN PYTHON
 
+path_to_jar = '/Users/leonshi/libs/stanford-parser-full-2018-10-17/stanford-parser.jar'
+path_to_models_jar = '/Users/leonshi/libs/stanford-parser-full-2018-10-17/stanford-parser-3.9.2-models.jar'
+
 In coreNLP folder in Libs:
 
 java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer \
