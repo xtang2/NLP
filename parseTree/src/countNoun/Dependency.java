@@ -5,9 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
@@ -18,9 +18,15 @@ import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
+import edu.stanford.nlp.trees.GrammaticalStructure;
+import edu.stanford.nlp.trees.GrammaticalStructureFactory;
+import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.trees.TypedDependency;
 
-public class countNount {
+public class Dependency {
     static String inputText = null;
     static List<String> sentences = new ArrayList<>();
 
@@ -43,17 +49,46 @@ public class countNount {
     }
 
     public static void main(String[] args) {
+        // LexicalizedParser lp =
+        // LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
 
-        countNount parser = new countNount();
+        TreebankLanguagePack tlp = new PennTreebankLanguagePack();
+        GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
+
+        // String[] sent = new String[] { "vladimir", "putin", "was", "born",
+        // "in", "st.", "petersburg", "and", "he",
+        // "was", "not", "born", "in", "berlin", "." };
+        // Tree parse = parser.apply(Sentence.toWordList(sent));
+        // GrammaticalStructure gs = gsf.newGrammaticalStructure(parse);
+        // Collection<TypedDependency> tdl = gs.typedDependencies();
+        // Tree dependTree = parser.parse(sent);
+        // System.out.println(tdl);
+
+        Dependency parser = new Dependency();
         int count = 0;
         parser.loadFile();
         for (String sentence : sentences) {
-            // System.out.println(sentence);
-
+            System.out.println(sentence);
             Tree tree = parser.parse(sentence);
+            GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
+            Collection<TypedDependency> tdl = gs.typedDependencies();
+            System.out.println(tdl);
 
+            for (TypedDependency td : tdl) {
+                if (td.reln().equals(EnglishGrammaticalRelations.NOMINAL_SUBJECT)) {
+                    System.out.println("Nominal Subj relation: " + td);
+                }
+                if (td.reln().equals(EnglishGrammaticalRelations.PREPOSITIONAL_OBJECT)) {
+                    System.out.println("Nominal Subj relation: " + td);
+                }
+
+                if (td.reln().toString().equals("nsubjpass")) {
+                    System.out.println("Passive Nominal Subj relation: " + td);
+                }
+
+            }
+            System.out.println("***************************");
             // print the tree
-            // tree.pennPrint();
 
             List<Tree> leaves = tree.getLeaves(); // Print words and Pos Tags
 
@@ -61,22 +96,14 @@ public class countNount {
                 // System.out.println(leaf);
                 // get the individual's parent in the tree
                 // X is Y, get X
+                // what is, what has,
 
                 if (leaf.parent(tree).label().value().equals("VBZ")) {
                     Tree parent = leaf.parent(tree).parent(tree).parent(tree).firstChild();
 
                     // System.out.println(parent.localTrees());
-                    //System.out.println("What is ");
-
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("What is ");
-                    for (Tree t : parent.getLeaves()) {
-                        sb.append(" " + t.label().value());
-                    }
-
-                    String answer = sb.toString();
-
-                    System.out.println(answer);
+                    // System.out.println("What is ");
+                    // System.out.println(parent.getLeaves());
                 }
 
                 // parent.label().value() + " ");
@@ -84,14 +111,14 @@ public class countNount {
                  * if (parent.label().value().equals("VBZ")) {
                  * System.out.println(leaf.label().value());
                  * System.out.println(parent.parent(tree).firstChild());
-                 *
+                 * 
                  * }
                  */
             }
 
-            System.out.println("new sentence");
+            // System.out.println("new sentence");
         }
-        System.out.println("total count : " + count);
+        // System.out.println("total count : " + count);
 
     }
 
@@ -104,20 +131,16 @@ public class countNount {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        fileContent = fileInput.useDelimiter("\\A").next();
+        // insert letters into a hashtable
+        Reader reader = new StringReader(fileContent);
+        DocumentPreprocessor dp = new DocumentPreprocessor(reader);
 
-        while (fileInput.hasNext()) {
-            fileContent = fileInput.useDelimiter(Pattern.compile("\\n")).next();
-            // insert letters into a hashtable
-            Reader reader = new StringReader(fileContent);
-            DocumentPreprocessor dp = new DocumentPreprocessor(reader);
+        for (List<HasWord> sentence : dp) {
+            // SentenceUtils not Sentence
+            String sentenceString = Sentence.listToString(sentence);
+            sentences.add(sentenceString);
 
-            for (List<HasWord> sentence : dp) {
-                // SentenceUtils not Sentence
-                String sentenceString = Sentence.listToString(sentence);
-                sentences.add(sentenceString);
-                //System.out.println(sentenceString);
-
-            }
         }
         // sentences.add("The Old Kingdom is the period in the third
         // millennium.");
