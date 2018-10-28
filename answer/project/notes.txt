@@ -1,0 +1,6 @@
+approach as suggested by leon:
+  - calculate levenshtein distance
+  - output the sentences
+
+what i can do:
+  - how to parse the sentences & use the trees
