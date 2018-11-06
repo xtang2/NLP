@@ -5,20 +5,20 @@ import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.PennTreebankLanguagePack;
@@ -26,7 +26,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TypedDependency;
 
-public class Dependency {
+public class Dependency{
     static String inputText = null;
     static List<String> sentences = new ArrayList<>();
 
@@ -73,12 +73,33 @@ public class Dependency {
             GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
             Collection<TypedDependency> tdl = gs.typedDependencies();
             System.out.println(tdl);
+            String[] words = sentence.split("\\s+");
 
             for (TypedDependency td : tdl) {
-                if (td.reln().equals(EnglishGrammaticalRelations.NOMINAL_SUBJECT)) {
+                if (td.reln().toString().equals("nsubj")) {
                     System.out.println("Nominal Subj relation: " + td);
+                    // subject with tagger
+                    System.out.println(td.dep());
+                    String subj = td.dep().originalText();
+                    System.out.println(td.dep().tag());
+
+                    // verb with tagger
+                    String predicate = td.gov().originalText();
+                    int startIndex = td.gov().index();
+                    System.out.println(startIndex);
+
+                    // get the rest of the sentence starting with the predicate
+                    if (subj.equals("which")) {
+                        String[] subWords = Arrays.copyOfRange(words, startIndex - 1, words.length);
+                        System.out.println("What " + Arrays.toString(subWords));
+                    } else {
+                        // what predicate.....? Who predicate .....?
+                        System.out.println("What did " + subj + " " + predicate + "?");
+
+                    }
+
                 }
-                if (td.reln().equals(EnglishGrammaticalRelations.PREPOSITIONAL_OBJECT)) {
+                if (td.reln().toString().equals("pobject")) {
                     System.out.println("Nominal Subj relation: " + td);
                 }
 
@@ -89,32 +110,6 @@ public class Dependency {
             }
             System.out.println("***************************");
             // print the tree
-
-            List<Tree> leaves = tree.getLeaves(); // Print words and Pos Tags
-
-            for (Tree leaf : leaves) {
-                // System.out.println(leaf);
-                // get the individual's parent in the tree
-                // X is Y, get X
-                // what is, what has,
-
-                if (leaf.parent(tree).label().value().equals("VBZ")) {
-                    Tree parent = leaf.parent(tree).parent(tree).parent(tree).firstChild();
-
-                    // System.out.println(parent.localTrees());
-                    // System.out.println("What is ");
-                    // System.out.println(parent.getLeaves());
-                }
-
-                // parent.label().value() + " ");
-                /*
-                 * if (parent.label().value().equals("VBZ")) {
-                 * System.out.println(leaf.label().value());
-                 * System.out.println(parent.parent(tree).firstChild());
-                 * 
-                 * }
-                 */
-            }
 
             // System.out.println("new sentence");
         }
@@ -138,7 +133,7 @@ public class Dependency {
 
         for (List<HasWord> sentence : dp) {
             // SentenceUtils not Sentence
-            String sentenceString = Sentence.listToString(sentence);
+            String sentenceString = SentenceUtils.listToString(sentence);
             sentences.add(sentenceString);
 
         }
