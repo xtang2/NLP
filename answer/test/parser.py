@@ -14,7 +14,10 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tree import ParentedTree
 
 parser = CoreNLPParser(url='http://localhost:9000')
-path = '/Users/leonshi/eclipse-workspace/NLP/a1.txt'
+path = sys.argv[1]
+
+question_file = sys.argv[2]
+
 wh_words = ['What', 'Where', 'Who', 'When']
 aux_words = ["am", "are", "is", "was", "were",
              "does", "did", "has", "had", "may", "might", "must",
@@ -24,16 +27,16 @@ aux_words = ["am", "are", "is", "was", "were",
 #Returns a list of the sentences
 def parse_sentences(path):
     with open(path) as r:
-        text = r.read()    
-        
+        text = r.read()
+
     #Use textblob to read file
     txt = TextBlob(text)
-    res = []   
-    
+    res = []
+
     #Append sentences to a list and return a list of the sentences
-    for sentence in txt.sentences: 
-        res.append(str(sentence)) 
-        
+    for sentence in txt.sentences:
+        res.append(str(sentence))
+
     return res
 
 #Takes in a sentence
@@ -45,29 +48,29 @@ def determine_wh(sentence):
     return wh_root
 
 #Takes in a text file and a list of sentences (questions)
-#Return the most relevent sentence
-def find_relevent(path, questions):
-    sentences = parse_sentences(path)   
-    
-    relevent = []
-    
+#Return the most relevant sentence
+def find_relevant(path, questions):
+    sentences = parse_sentences(path)
+
+    relevant = []
+
     for question in questions:
         lisDic = {}
         for i in range(len(sentences)):
             #print(edit_distance(question, sentences[i], transpositions=True))
             lisDic[i] = edit_distance(question, sentences[i], transpositions=True)
         minInd = min(lisDic, key = lisDic.get)
-        relevent.append(sentences[minInd])
-    
-    return relevent
- 
+        relevant.append(sentences[minInd])
+
+    return relevant
+
 #Takes in a text file and a list of sentences (questions)
-#Return a list of the most relevent sentences        
-def find_releventJ(path, questions):
-    sentences = parse_sentences(path)   
-    
-    relevent = []
-    
+#Return a list of the most relevant sentences
+def find_relevantJ(path, questions):
+    sentences = parse_sentences(path)
+
+    relevant = []
+
     #Find jaccard distance for every question/sentence pair and return the sentence w/ minimum jaccard distance
     for question in questions:
         question = set(list(parser.tokenize(question)))
@@ -77,53 +80,58 @@ def find_releventJ(path, questions):
             #print(jaccard_distance(question, token_sen))
             lisDic[i] = jaccard_distance(question, token_sen)
         minInd = min(lisDic, key = lisDic.get)
-        relevent.append(sentences[minInd])
-    
-    return relevent
+        relevant.append(sentences[minInd])
 
-def ans_type(question, relevent):
+    return relevant
+
+def ans_type(question, relevant):
     wh_root = determine_wh(question)
     if wh_root in aux_words:
-        ans_binary(question, relevent)
+        ans_binary(question, relevant)
     else:
-        ans_wh(question, relevent)
+        ans_wh(question, relevant)
 
+def answer(question, relevant):
+    print(question)
+    print(relevant)
 
+#
+#q_tree = parser.raw_parse(question)
+#r_tree = parser.raw_parse(relevant)
+#
+#q_tree = list(parser.raw_parse(questions[0]))
+#r_tree = list(parser.raw_parse(relevant[0]))
+#
+#newtree = ParentedTree.convert(r_tree[0])
+#newtree.draw()
+#
+#for subtree in newtree:
+#    print(subtree.left_sibling())
+#
+#print(q_tree)
+#for item in q_tree:
+#    print(item.label())
+#
+#def traverse_tree(tree):
+#    #print("tree:", tree)
+#    for subtree in tree:
+#        if type(subtree) == nltk.tree.ParentedTree:
+#            if subtree.label() == 'VP':
+#                print(subtree.subtrees())
+#                #print(subtree.leaves())
+#                #print(subtree.label())
+#            traverse_tree(subtree)
+#
+#traverse_tree(newtree)
+#
+#lemmatizer = WordNetLemmatizer()
+#print(lemmatizer.lemmatize("describes", pos='v'))
+#
+questions = ['What describes the important inscription on the tomb of Ankhtifi, a nomarch during the early First Intermediate Period?',
+'What perfected the art of carving intricate relief decoration?']
 
-q_tree = parser.raw_parse(question)
-r_tree = parser.raw_parse(relevent)        
+relevant = find_relevantJ(path, questions)
+answer(questions, relevant)
 
-q_tree = list(parser.raw_parse(questions[0]))
-r_tree = list(parser.raw_parse(relevent[0]))
-
-newtree = ParentedTree.convert(r_tree[0])
-newtree.draw()
-
-for subtree in newtree:
-    print(subtree.left_sibling())
-        
-print(q_tree)
-for item in q_tree:
-    print(item.label())
-
-def traverse_tree(tree):
-    #print("tree:", tree)
-    for subtree in tree:
-        if type(subtree) == nltk.tree.ParentedTree:
-            if subtree.label() == 'VP':
-                print(subtree.subtrees())
-                #print(subtree.leaves())
-                #print(subtree.label())
-            traverse_tree(subtree)
-            
-traverse_tree(newtree)
-   
-lemmatizer = WordNetLemmatizer()
-print(lemmatizer.lemmatize("describes", pos='v'))
-
-relevent = find_releventJ(path, questions)
-answer(questions[0], relevent[0])
-
-questions = ['What describes the important inscription on the tomb of Ankhtifi, a nomarch during the early First Intermediate Period?']
-    
-        
+#
+#
