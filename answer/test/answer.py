@@ -14,6 +14,9 @@ import ans_binary as bi
 path = sys.argv[1]
 questions = sys.argv[2]
 
+#path = '/Users/leonshi/eclipse-workspace/NLP/a1.txt'
+#questions = ['Was Userkaf succeed by his son Sahure?']
+
 bi = bi.Ans_Binary()
 np = sp.StanfordNLP()
 
@@ -103,8 +106,7 @@ def main():
             answer_list.append("Hello, this is what an answer should look like")
     
     for answer in answer_list:
-        print(answer + '/n')
-        
+        print(answer + '\n')      
 
 if __name__== "__main__":
     main()        
