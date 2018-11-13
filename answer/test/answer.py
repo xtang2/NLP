@@ -20,7 +20,7 @@ questions = sys.argv[2]
 bi = bi.Ans_Binary()
 np = sp.StanfordNLP()
 
-wh_words = ['What', 'Where', 'Who', 'When']
+wh_words = ['What', 'Where', 'Who', 'When', 'Why']
 aux_words = ["am", "are", "is", "was", "were",
              "does", "did", "has", "had", "may", "might", "must",
              "need", "ought", "shall", "should", "will", "would"]
@@ -103,6 +103,17 @@ def main():
                 answer_list.append('No')
         if ans_type(question) == 'Wh':
             #Do something depending on what type of question it is
+            wh_root = determine(question)
+            
+            if wh_root == 'why':
+                answer_list.append('Because why not?')
+            elif wh_root == 'when':
+                answer_list.append('Any time is a good time!')
+            elif wh_root == 'where':
+                answer_list.append('Where in the world is Carmen San Diego?')
+            elif wh_root == 'who':
+                answer_list.append('Donald Trump')
+            
             answer_list.append("Hello, this is what an answer should look like")
     
     for answer in answer_list:
