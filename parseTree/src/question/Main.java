@@ -13,7 +13,7 @@ public class Main {
 
     public static void main(String args[]) {
         String fileName = args[0];
-//        String fileName = "data1.txt";
+        int limit = Integer.parseInt(args[1]);
         // generate questions
         BinaryQuestionGenerator binary = new BinaryQuestionGenerator(fileName);
         WHQuestionGenerator wh = new WHQuestionGenerator(fileName);
@@ -23,10 +23,14 @@ public class Main {
         results.addAll(wh.getResult());
 
         // rank
-        rank(results);
+        List<MySentence> list = rank(results);
+
+        for (int i = 0; i < limit; i++) {
+            System.out.println(list.get(i).content);
+        }
     }
 
-    private static void rank(List<String> results) {
+    private static List<MySentence> rank(List<String> results) {
 
         List<Integer> len = new ArrayList<>();
         List<MySentence> list = new ArrayList<>();
@@ -41,8 +45,8 @@ public class Main {
         for (MySentence sentence : list) {
 //            System.out.println("score: " + sentence.score + " " + sentence.content);
             System.out.println(sentence.content);
-
         }
+        return list;
     }
 
     static class MySentence {
