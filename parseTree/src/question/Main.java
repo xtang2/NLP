@@ -12,7 +12,8 @@ import java.util.List;
 public class Main {
 
     public static void main(String args[]) {
-        String fileName = "data1.txt";
+        String fileName = args[0];
+//        String fileName = "data1.txt";
         // generate questions
         BinaryQuestionGenerator binary = new BinaryQuestionGenerator(fileName);
         WHQuestionGenerator wh = new WHQuestionGenerator(fileName);
@@ -38,7 +39,9 @@ public class Main {
         }
         Collections.sort(list, (s1, s2) -> s2.score - s1.score);
         for (MySentence sentence : list) {
-            System.out.println("score: " + sentence.score + " " + sentence.content);
+//            System.out.println("score: " + sentence.score + " " + sentence.content);
+            System.out.println(sentence.content);
+
         }
     }
 

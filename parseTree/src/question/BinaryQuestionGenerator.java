@@ -80,8 +80,8 @@ public class BinaryQuestionGenerator {
                         result.add(question);
 
 //                        System.out.println(sentence);
-                        System.out.println(sentence);
-                        System.out.println(tree.score());
+//                        System.out.println(sentence);
+//                        System.out.println(tree.score());
 //                        System.out.println();
                     }
                 } else {
