@@ -11,6 +11,7 @@ from textblob import TextBlob
 from nltk.metrics.distance import jaccard_distance
 import SCNLP as sp
 import ans_binary as bi
+import wh_answer as wa
 path = sys.argv[1]
 questions = sys.argv[2]
 
@@ -18,9 +19,10 @@ questions = sys.argv[2]
 #questions = ['Was Userkaf succeed by his son Sahure?']
 
 bi = bi.Ans_Binary()
+wh = wa.Wh_Answer()
 np = sp.StanfordNLP()
 
-wh_words = ['What', 'Where', 'Who', 'When', 'Why']
+wh_words = ['what', 'where', 'who', 'when', 'why']
 aux_words = ["am", "are", "is", "was", "were",
              "does", "did", "has", "had", "may", "might", "must",
              "need", "ought", "shall", "should", "will", "would"]
@@ -55,9 +57,9 @@ def find_releventJ(path, question):
         print("Please specify a file to search from.")
         return None
     
-    if isinstance(questions,(list,)) == False:
-        print("Please specify a list of questions")
-        return None
+    # if isinstance(questions,(list,)) == False:
+    #     print("Please specify a list of questions")
+    #     return None
     #Find jaccard distance for every question/sentence pair and return the sentence w/ minimum jaccard distance
 
     question = set(list(np.word_tokenize(question)))
@@ -91,33 +93,47 @@ def main():
             found = False
             scores = []
             relevent_list = find_releventJ(path, question)
-            for relevent in relevent_list:
-                #Answering question using binary answering module class
-                score = bi.ans_binary(question, relevent)
-                scores.append(score)
-            for score in scores:
-                if score == 1:
-                    found = True
-                    answer_list.append('Yes')
-            if not found:
+            if relevent_list is None:
                 answer_list.append('No')
+            else:
+                for relevent in relevent_list:
+                    #Answering question using binary answering module class
+                    score = bi.ans_binary(question, relevent)
+                    scores.append(score)
+                for score in scores:
+                    if score == 1:
+                        found = True
+                        answer_list.append('Yes')
+                if not found:
+                    answer_list.append('No')
         if ans_type(question) == 'Wh':
             #Do something depending on what type of question it is
-            wh_root = determine(question)
+            wh_root = determine_wh(question)
             
-            if wh_root == 'why':
+            if wh_root == 'what':
+                relevant_list = find_releventJ(path,question)
+                if relevant_list is None:
+                    found = False
+                else:
+                    for relevant in relevant_list:
+                        ans = wh.what_answer(question, relevant)
+                        if ans != "":
+                            found = True
+                            answer_list.append(ans.capitalize())
+                            break
+                        # insert scoring scheme here
+                    if not found:
+                        answer_list.append('What is a What?')
+            elif wh_root == 'why':
                 answer_list.append('Because why not?')
             elif wh_root == 'when':
                 answer_list.append('Any time is a good time!')
             elif wh_root == 'where':
                 answer_list.append('Where in the world is Carmen San Diego?')
             elif wh_root == 'who':
-                answer_list.append('Donald Trump')
-            
-            answer_list.append("Hello, this is what an answer should look like")
-    
+                answer_list.append('Subra Suresh.')
     for answer in answer_list:
-        print(answer + '\n')      
+        print(answer)      
 
 if __name__== "__main__":
     main()        

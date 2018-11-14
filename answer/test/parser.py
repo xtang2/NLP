@@ -6,6 +6,7 @@ Created on Sun Oct 28 14:07:28 2018
 @author: leonshi
 """
 
+import io
 import sys
 from textblob import TextBlob
 from nltk.parse.corenlp import CoreNLPParser
@@ -15,7 +16,6 @@ from nltk.tree import ParentedTree
 
 parser = CoreNLPParser(url='http://localhost:9000')
 path = sys.argv[1]
-
 question_file = sys.argv[2]
 
 wh_words = ['What', 'Where', 'Who', 'When']
@@ -127,8 +127,10 @@ def answer(question, relevant):
 #lemmatizer = WordNetLemmatizer()
 #print(lemmatizer.lemmatize("describes", pos='v'))
 #
-questions = ['What describes the important inscription on the tomb of Ankhtifi, a nomarch during the early First Intermediate Period?',
-'What perfected the art of carving intricate relief decoration?']
+
+with io.open(question_file, 'r', encoding='utf-8') as f:
+    questions = f.read().splitlines()
+
 
 relevant = find_relevantJ(path, questions)
 answer(questions, relevant)
