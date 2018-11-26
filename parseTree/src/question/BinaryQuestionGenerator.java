@@ -83,10 +83,10 @@ public class BinaryQuestionGenerator {
                         if(escapeSet.contains(tmp[0])) {
                             continue;
                         }
-                        String question = auxiliaryVerb + " " + firstHalf + " " + lastHalf + "?";
+                        String question = auxiliaryVerb + " " + firstHalf + " " + lastHalf.trim() + "?";
 //                        System.out.println(question);
 
-                        result.add(question.trim());
+                        result.add(question);
 
 //                        System.out.println(sentence);
 //                        System.out.println(sentence);
@@ -116,8 +116,8 @@ public class BinaryQuestionGenerator {
                 if (sentence.endsWith(" .")) {
                     sentence = sentence.substring(0, sentence.length()-1);
                 }
-                String q = auxiliaryVerb + " " + sentence + "?";
-                result.add(q.trim());
+                String q = auxiliaryVerb + " " + sentence.trim() + "?";
+                result.add(q);
 //                System.out.println("Question: " + auxiliaryVerb + " " + sentence);
             }
         }

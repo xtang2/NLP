@@ -170,8 +170,7 @@ public class WHQuestionGenerator {
                         sb.append(s);
                         sb.append(" ");
                     }
-                    sb.append("?");
-                    result.add(sb.toString().trim());
+                    result.add(sb.toString().trim() + "?");
                     // System.out.println("What " + q);
                 }
 
@@ -280,8 +279,8 @@ public class WHQuestionGenerator {
                 }
 
                 // what predicate.....? Who predicate .....?
-                String q = "What did " + subjects.get(i) + " " + predicates.get(i) + "?";
-                result.add(q.trim());
+                String q = "What did " + subjects.get(i) + " " + predicates.get(i).trim() + "?";
+                result.add(q);
 //                System.out.println(q);
 
                 continue;
@@ -323,8 +322,8 @@ public class WHQuestionGenerator {
             for (int tmp : list) {
                 sb.append(map.get(tmp) + " ");
             }
-            sb.append(predicates.get(i) + "?");
-            result.add(sb.toString().trim());
+            sb.append(predicates.get(i).trim() + "?");
+            result.add(sb.toString());
 //            System.out.println(sb.toString());
         }
 
