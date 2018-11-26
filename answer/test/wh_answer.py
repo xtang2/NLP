@@ -60,6 +60,18 @@ class Wh_Answer:
             elems += self.getAll(label,subtree)
         return elems
 
+    def getAllWords(self,label,t):
+        if type(t) == str:
+            return []
+        else:
+            elems = []
+            for subtree in t:
+                if type(subtree) == str and t.label() == label:
+                    elems.append(t)
+                else:
+                    elems += self.getAllWords(label,subtree)
+            return elems
+
     def what_answer_s(self,keyphrase, t):
         for s in self.getAll("S", t)[::-1]:
            for components in s:
@@ -106,11 +118,12 @@ class Wh_Answer:
 
     # where
     place_prep = ['above', 'across', 'along', 'among', 'around', 'at',
-                  'behind', 'below', 'beside', 'between', 'by',
-                  'close to', 'down', 'from', 'in front of', 'inside',
-                  'in', 'into', 'near', 'next to', 'on', 'onto',
-                  'opposite', 'out of', 'outside', 'over', 'past',
+                  'behind', 'below', 'beside', 'between', 'by', 'down',
+                  'from', 'inside', 'in', 'into', 'near', 'on', 'onto',
+                  'opposite', 'outside', 'over', 'past',
                   'through', 'to', 'towards', 'under', 'up']
+    two_place_prep = [('close','to'), ('in','front'), ('next','to'),
+                      ('out','of')]
 
     time_prep = ['on', 'in', 'at', 'since', 'for', 'ago', 'before',
                  'from', 'till', 'until', 'by']
@@ -133,7 +146,22 @@ class Wh_Answer:
                             nps = self.getAll("NP", p)
                             if len(nps) > 0:
                                 ans += " ".join(p.leaves()) + " "
-                    return ans
+                    if ans != "":
+                        return ans
+
+        for np in self.getAll("NP", t):
+            componentStem = [self.stemmer.stem(w) for w in np.leaves()]
+            if nstem in componentStem:
+                if np.label() == "NP":
+                    pchildren = [c for c in np if c.label() in plabels]
+                    ans = ""
+                    if len(pchildren) > 0:
+                        for p in pchildren:
+                            nps = self.getAll("NP", p)
+                            if len(nps) > 0:
+                                ans += " ".join(p.leaves()) + " "
+                    if ans != "":
+                        return ans
         return ""
 
 
@@ -144,9 +172,21 @@ class Wh_Answer:
         doc = self.snlp(question)
         for token in doc:
             if token.dep_ == 'nsubj' and token.head.dep_ == 'ROOT':
-                keystem = self.stemmer.stem(token.text)
-                rootstem = self.stemmer.stem(token.head.text)
-                ans = self.where_answer_npvp(rootstem, keystem, t)
+                nkey = token.text
+                nstem = self.stemmer.stem(token.text)
+                vstem = ""
+                root = token.head.text
+                if root in self.v_to_be:
+                    #find the verb
+                    for vtoken in doc:
+                        if (vtoken.dep_ == 'relcl' and
+                            vtoken.head.text == nkey):
+                            vkey = vtoken.text
+                            vstem = self.stemmer.stem(vtoken.text)
+                else:
+                    vstem = self.stemmer.stem(root)
+
+                ans = self.where_answer_npvp(vstem, nstem, t)
                 if ans != "":
                     return ans
         return ""

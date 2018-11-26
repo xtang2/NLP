@@ -9,13 +9,16 @@ class WeightedD:
         (max_elem,max_count) = c.most_common(1)[0]
 
         costs = defaultdict(lambda:1)
+        unplusCosts = defaultdict(int)
         for elem in c:
             curr_count = c[elem]
             factor = max_count / curr_count
             log_factor = math.log (factor)
             costs[elem] = 1 + log_factor
+            unplusCosts[elem] = log_factor
 
         self.costs = costs
+        self.unplusCosts = unplusCosts
 
 
     def ld(self, source, target):
@@ -49,10 +52,10 @@ class WeightedD:
 
         union_cost = 0
         for elem in union_elems:
-            union_cost += self.costs[elem]
+            union_cost += self.unplusCosts[elem]
         inters_cost = 0
         for elem in inters_elems:
-            inters_cost += self.costs[elem]
+            inters_cost += self.unplusCosts[elem]
 
         return (union_cost - inters_cost) / union_cost
 
