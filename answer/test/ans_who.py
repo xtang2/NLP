@@ -12,15 +12,15 @@ from nltk.stem import WordNetLemmatizer
 import SCNLP as sp
 
 class Ans_Who:
-    
+
     def __init__(self):
         self.np = sp.StanfordNLP()
-        
+
     def ans_who(self, question, relevent):
         names = self.np.ner(relevent)
 
         ans = ''
-        q_tokens = np.word_tokenize(question)
+        q_tokens = self.np.word_tokenize(question)
         #First do a title check and a person check
         for i in range(len(names)):
             if names[i][1] == 'TITLE' and names[i][0][0].istitle():
@@ -29,13 +29,13 @@ class Ans_Who:
                     break
             elif names[i][1] == 'PERSON':
                 ans = names[i][0] + '.'
-        
+
         #If NER does not recognize named entities, check for capitalized names
         for i in range(len(names)):
             if names[i][0][0].istitle() and names[i][0] not in q_tokens:
-                ans = names[i]            
-        
+                ans = names[i]
+
         if ans == '':
             ans = 'NONEFOUND'
-        
+
         return ans
