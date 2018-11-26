@@ -12,6 +12,7 @@ from nltk.metrics.distance import jaccard_distance
 import SCNLP as sp
 import ans_binary as bi
 import wh_answer as wa
+import weighted_dist as wd
 path = sys.argv[1]
 questions = sys.argv[2]
 
@@ -31,13 +32,13 @@ aux_words = ["am", "are", "is", "was", "were",
 #Returns a list of the sentences
 def parse_sentences(path):
     with open(path) as r:
-        text = r.read()          
+        text = r.read()
     #Use textblob to read file
     txt = TextBlob(text)
-    res = []      
+    res = []
     #Append sentences to a list and return a list of the sentences
-    for sentence in txt.sentences: 
-        res.append(str(sentence))        
+    for sentence in txt.sentences:
+        res.append(str(sentence))
     return res
 
 #Takes in a sentence
@@ -47,16 +48,15 @@ def determine_wh(sentence):
     wh_root = sentence[0].lower()
     #print(wh_root)
     return wh_root
-    
+
 #Takes in a text file and a list of sentences (questions)
-#Return a list of the most relevent sentences        
+#Return a list of the most relevent sentences
 def find_releventJ(path, question):
-    sentences = parse_sentences(path)   
     rel_sen = []
     if path is None:
         print("Please specify a file to search from.")
         return None
-    
+
     # if isinstance(questions,(list,)) == False:
     #     print("Please specify a list of questions")
     #     return None
@@ -70,7 +70,42 @@ def find_releventJ(path, question):
     rel_ind = sorted(lisDic, key=lisDic.get)[:5]
     for ind in rel_ind:
         rel_sen.append(sentences[ind])
-    
+
+    return rel_sen
+
+#Takes in a text file and a list of sentences (questions)
+#Return a list of the most relevent sentences
+def find_releventS(sentences, question):
+    rel_sen = []
+    if path is None:
+        print("Please specify a file to search from.")
+        return None
+
+    # if isinstance(questions,(list,)) == False:
+    #     print("Please specify a list of questions")
+    #     return None
+    #Find jaccard distance for every question/sentence pair and return the sentence w/ minimum jaccard distance
+
+    question_tokens = set(list(np.word_tokenize(question)))
+    lisDic = {}
+
+    tokens = []
+    sentence_tokens = []
+    #get all tokens
+    for i in range(len(sentences)):
+        token_sen = list(np.word_tokenize(sentences[i]))
+        sentence_tokens.append(set(token_sen))
+        tokens += token_sen
+    wd_calculator = wd.WeightedD(tokens)
+
+    for i in range(len(sentence_tokens)):
+        token_sen = sentence_tokens[i]
+        lisDic[i] = wd_calculator.jd(token_sen,question_tokens)
+
+    rel_ind = sorted(lisDic, key=lisDic.get)[:5]
+    for ind in rel_ind:
+        rel_sen.append(sentences[ind])
+
     return rel_sen
 
 def ans_type(question):
@@ -79,20 +114,21 @@ def ans_type(question):
         return 'Wh'
     else:
         return 'Binary'
-        
+
 def main():
     question_list = []
     answer_list = []
-    
+
+    sentences = parse_sentences(path)
     with open(questions, 'r') as r:
         for line in r:
-            question_list.append(line)
-                      
+            question_list.append(line.strip())
+
     for question in question_list:
-        if ans_type(question) == 'Binary':  
+        if ans_type(question) == 'Binary':
             found = False
             scores = []
-            relevent_list = find_releventJ(path, question)
+            relevent_list = find_releventS(sentences, question)
             if relevent_list is None:
                 answer_list.append('No')
             else:
@@ -106,34 +142,61 @@ def main():
                         answer_list.append('Yes')
                 if not found:
                     answer_list.append('No')
-        if ans_type(question) == 'Wh':
+        elif ans_type(question) == 'Wh':
             #Do something depending on what type of question it is
             wh_root = determine_wh(question)
-            
-            if wh_root == 'what':
-                relevant_list = find_releventJ(path,question)
-                if relevant_list is None:
-                    found = False
-                else:
-                    for relevant in relevant_list:
-                        ans = wh.what_answer(question, relevant)
-                        if ans != "":
-                            found = True
-                            answer_list.append(ans.capitalize())
-                            break
-                        # insert scoring scheme here
-                    if not found:
-                        answer_list.append('What is a What?')
-            elif wh_root == 'why':
-                answer_list.append('Because why not?')
-            elif wh_root == 'when':
-                answer_list.append('Any time is a good time!')
-            elif wh_root == 'where':
-                answer_list.append('Where in the world is Carmen San Diego?')
-            elif wh_root == 'who':
-                answer_list.append('Subra Suresh.')
+
+            relevant_list = find_releventS(sentences, question)
+            if relevant_list is None:
+                found = False
+                answer_list.append(question + ' Answer not found!')
+            else:
+                found = False
+                for relevant in relevant_list:
+                    if wh_root == 'what':
+                        #ans = wh.what_answer(question, relevant)
+                        ans = relevant
+                    if wh_root == 'why':
+                        ans = question + ' Because why not?'
+                    if wh_root == 'when':
+                        ans = question + ' Any time is a good time!'
+                    if wh_root == 'where':
+                        #ans = wh.where_answer(question, relevant)
+                        ans = relevant
+                    if wh_root == 'who':
+                        ans = question +' Subra Suresh.'
+                    if ans != "":
+                        found = True
+                        answer_list.append(question + "\n " +  ans.capitalize())
+                        break
+                if not found:
+                    answer_list.append(question + '\n Answer not found!')
+
+
+           #  if wh_root == 'what':
+           #      relevant_list = find_releventJ(path,question)
+           #      if relevant_list is None:
+           #          found = False
+           #      else:
+           #          for relevant in relevant_list:
+           #              ans = wh.what_answer(question, relevant)
+           #              if ans != "":
+           #                  found = True
+           #                  answer_list.append(ans.capitalize())
+           #                  break
+           #              # insert scoring scheme here
+           #          if not found:
+           #              answer_list.append('What is a What?')
+           #  elif wh_root == 'why':
+           #      answer_list.append('Because why not?')
+           #  elif wh_root == 'when':
+           #      answer_list.append('Any time is a good time!')
+           #  elif wh_root == 'where':
+
+           #  elif wh_root == 'who':
+           #      answer_list.append('Subra Suresh.')
     for answer in answer_list:
-        print(answer)      
+        print(answer)
 
 if __name__== "__main__":
-    main()        
+    main()

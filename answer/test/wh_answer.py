@@ -103,3 +103,56 @@ class Wh_Answer:
                     return ans
         return ""
 
+
+    # where
+    place_prep = ['above', 'across', 'along', 'among', 'around', 'at',
+                  'behind', 'below', 'beside', 'between', 'by',
+                  'close to', 'down', 'from', 'in front of', 'inside',
+                  'in', 'into', 'near', 'next to', 'on', 'onto',
+                  'opposite', 'out of', 'outside', 'over', 'past',
+                  'through', 'to', 'towards', 'under', 'up']
+
+    time_prep = ['on', 'in', 'at', 'since', 'for', 'ago', 'before',
+                 'from', 'till', 'until', 'by']
+
+    v_to_be = ['be', 'is', 'am', 'are', 'was', 'were']
+
+    verb_tags = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
+
+    def where_answer_npvp(self, vstem, nstem, t):
+        # look for ADJP, ADVP, PP in VPs first
+        plabels = ['ADJP', 'ADVP', 'PP']
+        for vp in self.getAll("VP", t)[::-1]:
+            componentStem = [self.stemmer.stem(w) for w in vp.leaves()]
+            if vstem in componentStem:
+                if vp.label() == "VP":
+                    pchildren = [c for c in vp if c.label() in plabels]
+                    ans = ""
+                    if len(pchildren) > 0:
+                        for p in pchildren:
+                            nps = self.getAll("NP", p)
+                            if len(nps) > 0:
+                                ans += " ".join(p.leaves()) + " "
+                    return ans
+        return ""
+
+
+
+    def where_answer(self, question, relevant):
+        t = Tree.fromstring(self.nlp.parse(relevant))
+
+        doc = self.snlp(question)
+        for token in doc:
+            if token.dep_ == 'nsubj' and token.head.dep_ == 'ROOT':
+                keystem = self.stemmer.stem(token.text)
+                rootstem = self.stemmer.stem(token.head.text)
+                ans = self.where_answer_npvp(rootstem, keystem, t)
+                if ans != "":
+                    return ans
+        return ""
+
+
+
+
+
+
