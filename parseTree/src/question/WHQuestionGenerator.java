@@ -24,6 +24,7 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.DocumentPreprocessor;
@@ -57,14 +58,17 @@ public class WHQuestionGenerator {
 
     List<String> result;
     Set<String> escapeSet;
+    Set<String> personSet;
 
     public WHQuestionGenerator(String fileName, Set<String> escapeSet) {
         this.escapeSet = escapeSet;
         result = new ArrayList<>();
         // set up pipeline properties
         props = new Properties();
-        props.put("annotators", "tokenize, ssplit, pos, lemma");
-        // props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+        props.put("annotators", "tokenize, ssplit, pos, lemma,ner");
+        props.setProperty("ner.applyFineGrained", "false");
+        props.setProperty("ner.useSUTime", "false");
+        props.setProperty("ner.applyNumericClassifiers", "false");
 
         // set up pipeline
         pipeline = new StanfordCoreNLP(props);
@@ -78,7 +82,33 @@ public class WHQuestionGenerator {
         // Tree dependTree = parser.parse(sent);
         // System.out.println(tdl);
 
-        loadFile(fileName);
+        String file = loadFile(fileName);
+        // make an example document
+        CoreDocument doc = new CoreDocument(file);
+        // // annotate the documents
+        pipeline.annotate(doc);
+
+        personSet = new HashSet<>();
+
+        // System.out.println(sentence);
+        // if begin position is 0 and if it is after a comma, we put who infront
+        for (CoreLabel elem : doc.tokens()) {
+
+            if (elem.ner().equals("PERSON")) {
+                // if the PERSON's name is after the comma, or if it is the
+                // start of the sentence
+                // int index = elem.index();
+                // if (index == 1 || doc.tokens().get(index -
+                // 2).word().equals(",")) {
+                personSet.add(elem.word());
+
+                // System.out.println(elem.word());
+                // System.out.println(elem.ner());
+                // System.out.println(elem.index());
+                // }
+            }
+        }
+
         for (String sentence : sentences) {
             if (sentence.contains("References")) {
                 break;
@@ -89,30 +119,12 @@ public class WHQuestionGenerator {
 
     private void process(String sentence) {
         HashMap<Integer, List<TypedDependency>> subjMap = new HashMap<>();
-//        System.out.println(sentence);
+        System.out.println(sentence);
         // get the lemma of the sentence
         List<String> lemmatized = lemmatize(sentence, pipeline);
 
         // Create StanfordCoreNLP object properties, with POS tagging
         // (required for lemmatization), and lemmatization
-
-        // make an example document
-        // CoreDocument doc = new CoreDocument(sentence);
-        // // annotate the documents
-        // pipeline.annotate(doc);
-        // // view results
-        // System.out.println("---");
-        // System.out.println("entities found");
-        // for (CoreEntityMention em : doc.entityMentions()) {
-        // System.out.println("\tdetected entity: \t" + em.text() + "\t" +
-        // em.entityType());
-        // }
-        // System.out.println("---");
-        // System.out.println("tokens and ner tags");
-        // String tokensAndNERTags = doc.tokens().stream().map(token -> "("
-        // + token.word() + "," + token.ner() + ")")
-        // .collect(Collectors.joining(" "));
-        // System.out.println(tokensAndNERTags);
 
         Tree tree = parser.parse(sentence);
         GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
@@ -127,8 +139,10 @@ public class WHQuestionGenerator {
         // Where
         whereSet.add("at");
         whereSet.add("to");
+        String subj = null;
+        int subjIndex = -1;
 
-
+        // Depedency parse, What questions
         for (TypedDependency td : tdl) {
             // index of subj as key
             int key = td.gov().index();
@@ -138,12 +152,11 @@ public class WHQuestionGenerator {
             List<TypedDependency> relations = subjMap.get(key);
             relations.add(td);
 
-            int subjIndex = -1;
             if (td.reln().toString().equals("nsubj") || td.reln().toString().equals("nsubjpass")) {
                 // System.out.println("Nominal Subj relation: " + td);
                 // subject with tagger
                 // System.out.println(td.dep());
-                String subj = td.dep().originalText();
+                subj = td.dep().originalText();
                 // System.out.println(td.dep().tag());
                 subjIndex = td.dep().index();
                 subjIndexes.add(subjIndex);
@@ -164,18 +177,19 @@ public class WHQuestionGenerator {
 
                 if (subj.equals("which")) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append("What ");
+                    sb.append("What");
                     String[] subWords = Arrays.copyOfRange(words, startIndex - 1, words.length - 1);
                     for (String s : subWords) {
-                        sb.append(s);
+
                         sb.append(" ");
+                        sb.append(s);
                     }
                     result.add(sb.toString().trim() + "?");
                     // System.out.println("What " + q);
                 }
 
-
             }
+
             //
             // if (td.reln().toString().equals("pobject") &&
             // td.dep().index() == subjIndex) {
@@ -190,9 +204,38 @@ public class WHQuestionGenerator {
 
         }
 
+        // generate who questions
+        int indexWho = sentence.toLowerCase().indexOf("who");
+        // if we found "who" inside the sentence, we can use it directly
+        if (indexWho != -1) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Who ");
+            String subString = sentence.substring(indexWho + 4, sentence.length() - 2);
+            sb.append(subString);
+            sb.append("?");
+            result.add(sb.toString());
+            // else check if subj is a person, if it is, we can
+            // generator Who questions
+        } else if (personSet.contains(subj)) {
+            StringBuilder sb = new StringBuilder();
+            String[] subWords = Arrays.copyOfRange(words, subjIndex, words.length - 1);
+            sb.append("Who");
+            for (String s : subWords) {
+                sb.append(" ");
+                sb.append(s);
+            }
+            sb.append("?");
+            // check for vague questions
+            String[] chars = sb.toString().split("\\s+");
+            if (!escapeSet.contains(chars[2])) {
+                result.add(sb.toString());
+            }
+
+        }
+
         generateQuestion(subjIndexes, tdl, subjMap, subjects, predicates);
 
-//        System.out.println("***************************");
+        // System.out.println("***************************");
 
     }
 
@@ -227,25 +270,29 @@ public class WHQuestionGenerator {
         return lemmas;
     }
 
-
     /**
-     * @param subjIndexes A list of indexes of Subjects found in the current sentence.
-     * @param tdl         Dependency tree generated by Stanford parser.
-     * @param subjMap     Map that stores the subjIndex as they key and a list of
-     *                    dependency relations that contains the subject index.
-     * @param subjects    A list of name of Subjects found in the current sentence.
-     * @param predicates  A list of predicates of Subjects found in the current
-     *                    sentence.
-     *                    <p>
-     *                    This method aims to add more detail to the generated question.
-     *                    It takes the above params to find if there exist any immediate
-     *                    modifier relations (amod, nmod, nummod, case) of the subject,
-     *                    It also goes down one more level to look for a second level
-     *                    modifier relations It then append these modifier phrases to
-     *                    the final question.
+     * @param subjIndexes
+     *            A list of indexes of Subjects found in the current sentence.
+     * @param tdl
+     *            Dependency tree generated by Stanford parser.
+     * @param subjMap
+     *            Map that stores the subjIndex as they key and a list of
+     *            dependency relations that contains the subject index.
+     * @param subjects
+     *            A list of name of Subjects found in the current sentence.
+     * @param predicates
+     *            A list of predicates of Subjects found in the current
+     *            sentence.
+     *            <p>
+     *            This method aims to add more detail to the generated question.
+     *            It takes the above params to find if there exist any immediate
+     *            modifier relations (amod, nmod, nummod, case) of the subject,
+     *            It also goes down one more level to look for a second level
+     *            modifier relations It then append these modifier phrases to
+     *            the final question.
      */
     private void generateQuestion(List<Integer> subjIndexes, Collection<TypedDependency> tdl,
-                                         HashMap<Integer, List<TypedDependency>> subjMap, List<String> subjects, List<String> predicates) {
+            HashMap<Integer, List<TypedDependency>> subjMap, List<String> subjects, List<String> predicates) {
         Set<String> modifierSet = new HashSet<>();
         modifierSet.add("amod");
         modifierSet.add("nmod");
@@ -254,13 +301,13 @@ public class WHQuestionGenerator {
         modifierSet.add("advmod");
         modifierSet.add("mwe");
 
-//        Set<String> whSet = new HashSet<>();
-//        whSet.add("he");
-//        whSet.add("who");
-//        whSet.add("what");
-//        whSet.add("that");
-//        whSet.add("it");
-//        whSet.add("this");
+        // Set<String> whSet = new HashSet<>();
+        // whSet.add("he");
+        // whSet.add("who");
+        // whSet.add("what");
+        // whSet.add("that");
+        // whSet.add("it");
+        // whSet.add("this");
 
         if (subjIndexes == null || subjIndexes.isEmpty()) {
             return;
@@ -281,7 +328,7 @@ public class WHQuestionGenerator {
                 // what predicate.....? Who predicate .....?
                 String q = "What did " + subjects.get(i) + " " + predicates.get(i).trim() + "?";
                 result.add(q);
-//                System.out.println(q);
+                // System.out.println(q);
 
                 continue;
             }
@@ -318,13 +365,13 @@ public class WHQuestionGenerator {
             // build question
             Collections.sort(list);
             StringBuilder sb = new StringBuilder();
-            sb.append("what did ");
+            sb.append("What did ");
             for (int tmp : list) {
                 sb.append(map.get(tmp) + " ");
             }
             sb.append(predicates.get(i).trim() + "?");
             result.add(sb.toString());
-//            System.out.println(sb.toString());
+            // System.out.println(sb.toString());
         }
 
     }
