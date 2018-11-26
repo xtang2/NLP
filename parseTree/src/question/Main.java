@@ -16,7 +16,7 @@ public class Main {
 
         // add escape words.
         Set<String> escapeSet = new HashSet<>(Arrays.asList(new String[]{"he", "she", "him", "her", "me", "it", "who",
-                                                    "this", "that", "which", "these", "those",}));
+                                                    "this", "that", "which", "these", "those", "was"}));
 
         // generate questions
         BinaryQuestionGenerator binary = new BinaryQuestionGenerator(fileName, escapeSet);

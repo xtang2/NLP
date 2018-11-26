@@ -86,7 +86,7 @@ public class BinaryQuestionGenerator {
                         String question = auxiliaryVerb + " " + firstHalf + " " + lastHalf + "?";
 //                        System.out.println(question);
 
-                        result.add(question);
+                        result.add(question.trim());
 
 //                        System.out.println(sentence);
 //                        System.out.println(sentence);
@@ -113,7 +113,11 @@ public class BinaryQuestionGenerator {
                         auxiliaryVerb = "Do";
                     }
                 }
-                result.add(auxiliaryVerb + " " + sentence + "?");
+                if (sentence.endsWith(" .")) {
+                    sentence = sentence.substring(0, sentence.length()-1);
+                }
+                String q = auxiliaryVerb + " " + sentence + "?";
+                result.add(q.trim());
 //                System.out.println("Question: " + auxiliaryVerb + " " + sentence);
             }
         }
