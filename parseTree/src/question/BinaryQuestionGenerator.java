@@ -35,7 +35,10 @@ public class BinaryQuestionGenerator {
 
     public List<String> result;
 
-    BinaryQuestionGenerator(String fileName) {
+    Set<String> escapeSet;
+
+    BinaryQuestionGenerator(String fileName, Set<String> set) {
+        this.escapeSet = set;
         result = new ArrayList<>();
         int count = 0;
         loadFile(fileName);
@@ -74,6 +77,12 @@ public class BinaryQuestionGenerator {
                         // create a question
                         String firstHalf = createString(parent.parent(tree).firstChild());
                         String lastHalf = createString(next);
+
+                        // check escape words
+                        String[] tmp = firstHalf.split("\\s");
+                        if(escapeSet.contains(tmp[0])) {
+                            continue;
+                        }
                         String question = auxiliaryVerb + " " + firstHalf + " " + lastHalf + "?";
 //                        System.out.println(question);
 
@@ -104,6 +113,7 @@ public class BinaryQuestionGenerator {
                         auxiliaryVerb = "Do";
                     }
                 }
+                result.add(auxiliaryVerb + " " + sentence + "?");
 //                System.out.println("Question: " + auxiliaryVerb + " " + sentence);
             }
         }

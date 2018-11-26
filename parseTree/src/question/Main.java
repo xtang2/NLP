@@ -2,21 +2,25 @@ package question;
 
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author sisi on 11/14/18
  */
 public class Main {
 
-    public static void main(String args[]) {
+
+    public static void main(String[] args) {
         String fileName = args[0];
         int limit = Integer.parseInt(args[1]);
+
+        // add escape words.
+        Set<String> escapeSet = new HashSet<>(Arrays.asList(new String[]{"he", "she", "him", "her", "me", "it", "who",
+                                                    "this", "that", "which", "these", "those",}));
+
         // generate questions
-        BinaryQuestionGenerator binary = new BinaryQuestionGenerator(fileName);
-        WHQuestionGenerator wh = new WHQuestionGenerator(fileName);
+        BinaryQuestionGenerator binary = new BinaryQuestionGenerator(fileName, escapeSet);
+        WHQuestionGenerator wh = new WHQuestionGenerator(fileName, escapeSet);
 
         List<String> results = new ArrayList<>();
         results.addAll(binary.getResult());
@@ -42,10 +46,10 @@ public class Main {
             }
         }
         Collections.sort(list, (s1, s2) -> s2.score - s1.score);
-        for (MySentence sentence : list) {
+//        for (MySentence sentence : list) {
 //            System.out.println("score: " + sentence.score + " " + sentence.content);
-            System.out.println(sentence.content);
-        }
+//            System.out.println(sentence.content);
+//        }
         return list;
     }
 

@@ -56,8 +56,10 @@ public class WHQuestionGenerator {
     private final LexicalizedParser parser = LexicalizedParser.loadModel(PCG_MODEL);
 
     List<String> result;
+    Set<String> escapeSet;
 
-    public WHQuestionGenerator(String fileName) {
+    public WHQuestionGenerator(String fileName, Set<String> escapeSet) {
+        this.escapeSet = escapeSet;
         result = new ArrayList<>();
         // set up pipeline properties
         props = new Properties();
@@ -160,12 +162,17 @@ public class WHQuestionGenerator {
 
                 predicates.add(predicate);
 
-
                 if (subj.equals("which")) {
-                    String[] subWords = Arrays.copyOfRange(words, startIndex - 1, words.length);
-                    String q = "What " + Arrays.toString(subWords);
-                    result.add(q);
-//                    System.out.println("What " + q);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("What ");
+                    String[] subWords = Arrays.copyOfRange(words, startIndex - 1, words.length - 1);
+                    for (String s : subWords) {
+                        sb.append(s);
+                        sb.append(" ");
+                    }
+                    sb.append("?");
+                    result.add(sb.toString());
+                    // System.out.println("What " + q);
                 }
 
 
@@ -248,13 +255,13 @@ public class WHQuestionGenerator {
         modifierSet.add("advmod");
         modifierSet.add("mwe");
 
-        Set<String> whSet = new HashSet<>();
-        whSet.add("he");
-        whSet.add("who");
-        whSet.add("what");
-        whSet.add("that");
-        whSet.add("it");
-        whSet.add("this");
+//        Set<String> whSet = new HashSet<>();
+//        whSet.add("he");
+//        whSet.add("who");
+//        whSet.add("what");
+//        whSet.add("that");
+//        whSet.add("it");
+//        whSet.add("this");
 
         if (subjIndexes == null || subjIndexes.isEmpty()) {
             return;
@@ -268,7 +275,7 @@ public class WHQuestionGenerator {
             List<TypedDependency> deps = subjMap.get(index);
             if (deps == null || deps.isEmpty()) {
                 // get the rest of the sentence starting with the predicate
-                if (whSet.contains(subjects.get(i))) {
+                if (escapeSet.contains(subjects.get(i))) {
                     continue;
                 }
 
