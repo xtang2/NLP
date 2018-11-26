@@ -5,6 +5,7 @@ from queue import Queue
 import sys
 
 text = input()
+print("parsing \"" + text + "\"...")
 
 nlp = StanfordCoreNLP("http://localhost", port=9000, timeout=30000)
 
