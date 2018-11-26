@@ -7,12 +7,15 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.Tree;
+
+import static question.WHQuestionGenerator.lemmatize;
 
 /**
  * @author sisi
@@ -32,12 +35,20 @@ public class BinaryQuestionGenerator {
 
     private final LexicalizedParser parser = LexicalizedParser.loadModel(PCG_MODEL);
 
+    Properties props;
+
+    StanfordCoreNLP pipeline;
 
     public List<String> result;
 
     Set<String> escapeSet;
 
     BinaryQuestionGenerator(String fileName, Set<String> set) {
+        // set up pipeline
+        props = new Properties();
+        props.put("annotators", "tokenize, ssplit, pos, lemma");
+        pipeline = new StanfordCoreNLP(props);
+
         this.escapeSet = set;
         result = new ArrayList<>();
         int count = 0;
@@ -83,6 +94,9 @@ public class BinaryQuestionGenerator {
                         if(escapeSet.contains(tmp[0])) {
                             continue;
                         }
+
+
+
                         String question = auxiliaryVerb + " " + firstHalf + " " + lastHalf.trim() + "?";
 //                        System.out.println(question);
 
@@ -116,8 +130,10 @@ public class BinaryQuestionGenerator {
                 if (sentence.endsWith(" .")) {
                     sentence = sentence.substring(0, sentence.length()-1);
                 }
-                String q = auxiliaryVerb + " " + sentence.trim() + "?";
-                result.add(q);
+                if (!auxiliaryVerb.equals("")) {
+                    String q = auxiliaryVerb + " " + sentence.trim() + "?";
+                    result.add(q);
+                }
 //                System.out.println("Question: " + auxiliaryVerb + " " + sentence);
             }
         }
