@@ -51,7 +51,7 @@ def determine_wh(sentence):
 
 #Takes in a text file and a list of sentences (questions)
 #Return a list of the most relevent sentences
-def find_releventJ(path, question):
+def find_releventJ(sentences, question):
     rel_sen = []
     if path is None:
         print("Please specify a file to search from.")
@@ -154,15 +154,13 @@ def main():
                 found = False
                 for relevant in relevant_list:
                     if wh_root == 'what':
-                        #ans = wh.what_answer(question, relevant)
-                        ans = relevant
+                        ans = wh.what_answer(question, relevant)
                     if wh_root == 'why':
                         ans = question + ' Because why not?'
                     if wh_root == 'when':
                         ans = question + ' Any time is a good time!'
                     if wh_root == 'where':
-                        #ans = wh.where_answer(question, relevant)
-                        ans = relevant
+                        ans = wh.where_answer(question, relevant)
                     if wh_root == 'who':
                         ans = question +' Subra Suresh.'
                     if ans != "":
@@ -170,7 +168,7 @@ def main():
                         answer_list.append(question + "\n " +  ans.capitalize())
                         break
                 if not found:
-                    answer_list.append(question + '\n Answer not found!')
+                    answer_list.append(question + str(relevant_list))
 
 
            #  if wh_root == 'what':
