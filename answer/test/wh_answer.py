@@ -164,11 +164,6 @@ class Wh_Answer:
                         return ans
         return ""
 
-
-    def location_answer(self, q_tokens, relevant):
-        names = self.nlp.ner(relevant)
-        locations = [w for (w,c) in names if c =='LOCATION']
-
     def where_answer(self, question, relevant):
         t = Tree.fromstring(self.nlp.parse(relevant))
 
@@ -196,6 +191,9 @@ class Wh_Answer:
         return ""
 
     def who_answer(self, question, relevant):
+        return self.where_answer(question,relevant)
+
+    def who_answer(self, question, relevant):
         names = self.nlp.ner(relevant)
 
         ans = ''
@@ -221,12 +219,12 @@ class Wh_Answer:
             ans = 'NONEFOUND'
 
         return ans
-    
-    why_words = ['because', 'since', 'therefore', 'as a result of', 'as long as', 
+
+    why_words = ['because', 'since', 'therefore', 'as a result of', 'as long as',
              'by reason of', 'by virtue of', 'considering', 'due to', 'for the reason that',
              'for the sake of', 'in as much as', 'in behalf of', 'in that', 'in the interest of'
              'now that', 'for the reason that', 'by cause of', 'thanks to']
-    
+
     def find_S(self, tree):
         phrases = []
         if tree.label()[0] == 'S':
@@ -237,16 +235,16 @@ class Wh_Answer:
                 if (len(list_of_phrases) > 0):
                     phrases.extend(list_of_phrases)
         return phrases
-    
+
     def why_answer(self, question, relevant):
         #Get all nouns in the question
         Q_nouns = [tup[0] for tup in self.nlp.pos(question) if tup[1][0] == 'N']
-        
+
         #Find all phrases and sub phrases from the relevent sentence
-        r_out = Tree.fromstring(self.nlp.parse(relevant))    
+        r_out = Tree.fromstring(self.nlp.parse(relevant))
         phrase_ans = []
         phrases = self.find_S(r_out)
-            
+
         #For each phrase, find the NP and VP and parse out the nouns in the NP
         for tree in phrases:
             #print(tree.label())
@@ -265,7 +263,7 @@ class Wh_Answer:
                             break
                 verbP = ''
                 if subtree.label() == 'VP':
-                    verbP = " " .join(subtree.leaves())   
+                    verbP = " " .join(subtree.leaves())
                 #If we find an instance of a "Why" word, find the position and return the string starting from that position.
                 for word in self.why_words:
                     if word in verbP:
@@ -274,22 +272,22 @@ class Wh_Answer:
                         verbP = verbP[location:]
                         phrase_ans.append(verbP.capitalize())
                         break
-            
+
             #If there was no phrase, append WrongPhrase
             if found == False:
                 phrase_ans.append('WrongPhrase')
-                
+
         ans = ''
         #Check all the answers in phrase answers, the correct answer is the one that is not from a Wrong Phrase
         for answer in phrase_ans:
             if answer != 'WrongPhrase':
                 ans = answer + '.'
-        
+
         if ans == '':
             return relevant
         else:
             return ans
-    
-    
+
+
 
 
