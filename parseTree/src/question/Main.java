@@ -20,7 +20,7 @@ public class Main {
 
         // add escape words.
         Set<String> escapeSet = new HashSet<>(Arrays.asList(new String[]{"he", "she", "him", "her", "me", "it", "who",
-                                                    "this", "that", "which", "these", "those", "was"}));
+                                                    "this", "that", "which", "these", "those", "was", "his"}));
 
         // generate questions
         BinaryQuestionGenerator binary = new BinaryQuestionGenerator(fileName, escapeSet);
@@ -69,6 +69,11 @@ public class Main {
                 }
             }
             sen.decrease(errCnt);
+
+            // who is a good question
+            if (r.startsWith("Who")) {
+                sen.increase(1);
+            }
         }
         Collections.shuffle(list);
         Collections.sort(list, (s1, s2) -> s2.score - s1.score);
@@ -88,6 +93,10 @@ public class Main {
         }
         public void decrease(int s) {
             score -= s;
+        }
+
+        public void increase(int i) {
+            score -= i;
         }
     }
 }

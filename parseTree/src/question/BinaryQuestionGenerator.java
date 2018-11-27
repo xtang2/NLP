@@ -15,8 +15,6 @@ import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.Tree;
 
-import static question.WHQuestionGenerator.lemmatize;
-
 /**
  * @author sisi
  */
@@ -59,7 +57,7 @@ public class BinaryQuestionGenerator {
             }
             process(sentence);
         }
-        System.out.println("processed : " + count + " sentences.");
+//        System.out.println("processed : " + count + " sentences.");
     }
 
 
@@ -98,7 +96,9 @@ public class BinaryQuestionGenerator {
 
 
                         String question = auxiliaryVerb + " " + firstHalf + " " + lastHalf.trim() + "?";
-//                        System.out.println(question);
+                        question = question.replaceAll(" ,", ",");
+                        question = question.replaceAll(" '", "'");
+                        question = question.replaceAll(" \\.", ".");
 
                         result.add(question);
 
@@ -131,8 +131,11 @@ public class BinaryQuestionGenerator {
                     sentence = sentence.substring(0, sentence.length()-1);
                 }
                 if (!auxiliaryVerb.equals("")) {
-                    String q = auxiliaryVerb + " " + sentence.trim() + "?";
-                    result.add(q);
+                    String question = auxiliaryVerb + " " + sentence.trim() + "?";
+                    question = question.replaceAll(" ,", ",");
+                    question = question.replaceAll(" '", "'");
+                    question = question.replaceAll(" \\.", ".");
+                    result.add(question);
                 }
 //                System.out.println("Question: " + auxiliaryVerb + " " + sentence);
             }

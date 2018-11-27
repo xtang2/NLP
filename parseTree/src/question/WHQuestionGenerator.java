@@ -59,6 +59,7 @@ public class WHQuestionGenerator {
     List<String> result;
     Set<String> escapeSet;
     Set<String> personSet;
+    Set<String> locationSet;
 
     public WHQuestionGenerator(String fileName, Set<String> escapeSet) {
         this.escapeSet = escapeSet;
@@ -89,6 +90,7 @@ public class WHQuestionGenerator {
         pipeline.annotate(doc);
 
         personSet = new HashSet<>();
+        locationSet = new HashSet<>();
 
         // System.out.println(sentence);
         // if begin position is 0 and if it is after a comma, we put who infront
@@ -107,6 +109,10 @@ public class WHQuestionGenerator {
                 // System.out.println(elem.index());
                 // }
             }
+
+            if (elem.ner().equals("LOCATION")) {
+                locationSet.add(elem.word());
+            }
         }
 
         for (String sentence : sentences) {
@@ -119,7 +125,7 @@ public class WHQuestionGenerator {
 
     private void process(String sentence) {
         HashMap<Integer, List<TypedDependency>> subjMap = new HashMap<>();
-        System.out.println(sentence);
+//        System.out.println(sentence);
         // get the lemma of the sentence
         List<String> lemmatized = lemmatize(sentence, pipeline);
 
@@ -151,6 +157,8 @@ public class WHQuestionGenerator {
             }
             List<TypedDependency> relations = subjMap.get(key);
             relations.add(td);
+            subj = null;
+            subjIndex = -1;
 
             if (td.reln().toString().equals("nsubj") || td.reln().toString().equals("nsubjpass")) {
                 // System.out.println("Nominal Subj relation: " + td);
@@ -184,7 +192,11 @@ public class WHQuestionGenerator {
                         sb.append(" ");
                         sb.append(s);
                     }
-                    result.add(sb.toString().trim() + "?");
+                    String question = sb.toString().trim() + "?";
+                    question = question.replaceAll(" ,", ",");
+                    question = question.replaceAll(" '", "'");
+                    question = question.replaceAll(" \\.", ".");
+                    result.add(question);
                     // System.out.println("What " + q);
                 }
 
@@ -213,7 +225,12 @@ public class WHQuestionGenerator {
             String subString = sentence.substring(indexWho + 4, sentence.length() - 2);
             sb.append(subString);
             sb.append("?");
-            result.add(sb.toString());
+
+            String question = sb.toString().trim() + "?";
+            question = question.replaceAll(" ,", ",");
+            question = question.replaceAll(" '", "'");
+            question = question.replaceAll(" \\.", ".");
+            result.add(question);
             // else check if subj is a person, if it is, we can
             // generator Who questions
         } else if (personSet.contains(subj)) {
@@ -228,11 +245,26 @@ public class WHQuestionGenerator {
             // check for vague questions
             String[] chars = sb.toString().split("\\s+");
             if (!escapeSet.contains(chars[2])) {
-                result.add(sb.toString());
+                String question = sb.toString();
+                question = question.replaceAll(" ,", ",");
+                question = question.replaceAll(" '", "'");
+                question = question.replaceAll(" \\.", ".");
+                result.add(question);
             }
 
         }
 
+        // generate where question
+//        for (String location : locationSet) {
+//            if (sentence.contains(location)) {
+//                System.out.println("location: "+ location);
+//                System.out.println(sentence);
+//                System.out.println();
+//
+//            }
+//        }
+
+        // generate what question
         generateQuestion(subjIndexes, tdl, subjMap, subjects, predicates);
 
         // System.out.println("***************************");
@@ -326,8 +358,11 @@ public class WHQuestionGenerator {
                 }
 
                 // what predicate.....? Who predicate .....?
-                String q = "What did " + subjects.get(i) + " " + predicates.get(i).trim() + "?";
-                result.add(q);
+                String question = "What did " + subjects.get(i) + " " + predicates.get(i).trim() + "?";
+                question = question.replaceAll(" ,", ",");
+                question = question.replaceAll(" '", "'");
+                question = question.replaceAll(" \\.", ".");
+                result.add(question);
                 // System.out.println(q);
 
                 continue;
@@ -370,7 +405,11 @@ public class WHQuestionGenerator {
                 sb.append(map.get(tmp) + " ");
             }
             sb.append(predicates.get(i).trim() + "?");
-            result.add(sb.toString());
+            String question = sb.toString();
+            question = question.replaceAll(" ,", ",");
+            question = question.replaceAll(" '", "'");
+            question = question.replaceAll(" \\.", ".");
+            result.add(question);
             // System.out.println(sb.toString());
         }
 
