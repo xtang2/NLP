@@ -165,6 +165,11 @@ class Wh_Answer:
         return ""
 
 
+    def location_answer(self, q_tokens, relevant):
+        names = self.nlp.ner(relevant)
+        locations = [w for (w,c) in names if c =='LOCATION']
+
+
 
     def where_answer(self, question, relevant):
         t = Tree.fromstring(self.nlp.parse(relevant))
@@ -192,10 +197,7 @@ class Wh_Answer:
                     return ans
         return ""
 
-    def when_answer(self, question, relevant):
-        return self.where_answer(question,relevant)
-
-    def ans_who(self, question, relevent):
+    def who_answer(self, question, relevent):
         names = self.nlp.ner(relevent)
 
         ans = ''
@@ -221,8 +223,68 @@ class Wh_Answer:
             ans = 'NONEFOUND'
 
         return ans
-
-
-
+    
+    why_words = ['because', 'since', 'therefore', 'as a result of', 'as long as', 
+             'by reason of', 'by virtue of', 'considering', 'due to', 'for the reason that',
+             'for the sake of', 'in as much as', 'in behalf of', 'in that', 'in the interest of'
+             'now that', 'for the reason that', 'by cause of', 'thanks to']
+    
+    def find_S(self, tree):
+        phrases = []
+        if tree.label()[0] == 'S':
+            phrases.append(tree)
+        for child in tree:
+            if type(child) is Tree:
+                list_of_phrases = self.find_S(child)
+                if (len(list_of_phrases) > 0):
+                    phrases.extend(list_of_phrases)
+        return phrases
+    
+    def why_answer(self, question, relevent):
+        Q_nouns = [tup[0] for tup in self.nlp.pos(question) if tup[1][0] == 'N']
+    
+        r_out = Tree.fromstring(self.nlp.parse(relevent))    
+        phrase_ans = []
+        phrases = self.find_S(r_out)
+            
+        for tree in phrases:
+            #print(tree.label())
+            #print(tree.leaves())
+            found = False
+            for subtree in tree:
+                #print(subtree.label())
+                #print(subtree.leaves())
+                if subtree.label() == 'NP':
+                    nounP = " ".join(subtree.leaves())
+                    R_nouns = [tup[0] for tup in self.nlp.pos(nounP) if tup[1][0] == 'N']
+                    for noun in R_nouns:
+                        if noun not in Q_nouns:
+                            phrase_ans.append('WrongPhrase')
+                            break
+                verbP = ''
+                if subtree.label() == 'VP':
+                    verbP = " " .join(subtree.leaves())            
+                for word in self.why_words:
+                    if word in verbP:
+                        found = True
+                        location = verbP.find(word)
+                        verbP = verbP[location:]
+                        phrase_ans.append(verbP.capitalize())
+                        break
+                
+            if found == False:
+                phrase_ans.append('WrongPhrase')
+                
+        ans = ''
+        for answer in phrase_ans:
+            if answer != 'WrongPhrase':
+                ans = answer + '.'
+        
+        if ans == '':
+            return 'No answer found.'
+        else:
+            return ans
+    
+    
 
 
