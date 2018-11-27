@@ -195,8 +195,8 @@ class Wh_Answer:
                     return ans
         return ""
 
-    def who_answer(self, question, relevent):
-        names = self.nlp.ner(relevent)
+    def who_answer(self, question, relevant):
+        names = self.nlp.ner(relevant)
 
         ans = ''
         q_tokens = self.nlp.word_tokenize(question)
@@ -238,12 +238,12 @@ class Wh_Answer:
                     phrases.extend(list_of_phrases)
         return phrases
     
-    def why_answer(self, question, relevent):
+    def why_answer(self, question, relevant):
         #Get all nouns in the question
         Q_nouns = [tup[0] for tup in self.nlp.pos(question) if tup[1][0] == 'N']
         
         #Find all phrases and sub phrases from the relevent sentence
-        r_out = Tree.fromstring(self.nlp.parse(relevent))    
+        r_out = Tree.fromstring(self.nlp.parse(relevant))    
         phrase_ans = []
         phrases = self.find_S(r_out)
             
@@ -286,7 +286,7 @@ class Wh_Answer:
                 ans = answer + '.'
         
         if ans == '':
-            return relevent
+            return relevant
         else:
             return ans
     

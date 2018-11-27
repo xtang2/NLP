@@ -156,13 +156,13 @@ def main():
                     if wh_root == 'what' or wh_root == 'which':
                         ans = wh.what_answer(question, relevant)
                     if wh_root == 'why':
-                        ans = question + ' Because why not?'
+                        ans = wh.why_answer(question, relevant)
                     if wh_root == 'when':
                         ans = wh.when_answer(question,relevant)
                     if wh_root == 'where':
                         ans = wh.where_answer(question, relevant)
                     if wh_root == 'who':
-                        ans = wh.ans_who(question,relevant)
+                        ans = wh.who_answer(question,relevant)
                     if ans != "":
                         found = True
                         answer_list.append(ans.capitalize())
