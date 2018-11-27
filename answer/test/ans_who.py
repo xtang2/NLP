@@ -27,6 +27,9 @@ class Ans_Who:
                 if names[i+1][0][0].istitle():
                     ans = names[i][0] + ' ' + names[i+1][0] + '.'
                     break
+                elif names[i][0][0].istitle():
+                    ans = 'The ' + names[i][0] + '.'
+                    break
             elif names[i][1] == 'PERSON':
                 ans = names[i][0] + '.'
 
