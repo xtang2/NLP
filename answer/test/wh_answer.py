@@ -132,7 +132,7 @@ class Wh_Answer:
 
     verb_tags = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
 
-    def where_answer_npvp(self, vstem, nstem, t):
+    def answer_npvp(self, vstem, nstem, t):
         # look for ADJP, ADVP, PP in VPs first
         plabels = ['ADJP', 'ADVP', 'PP']
         for vp in self.getAll("VP", t)[::-1]:
@@ -165,6 +165,11 @@ class Wh_Answer:
         return ""
 
 
+    def location_answer(self, q_tokens, relevant):
+        names = self.nlp.ner(relevant)
+        locations = [w for (w,c) in names if c =='LOCATION']
+
+
 
     def where_answer(self, question, relevant):
         t = Tree.fromstring(self.nlp.parse(relevant))
@@ -186,11 +191,35 @@ class Wh_Answer:
                 else:
                     vstem = self.stemmer.stem(root)
 
-                ans = self.where_answer_npvp(vstem, nstem, t)
+                ans = self.answer_npvp(vstem, nstem, t)
+
                 if ans != "":
                     return ans
         return ""
 
+    def ans_who(self, question, relevent):
+        names = self.nlp.ner(relevent)
+
+        ans = ''
+        q_tokens = self.nlp.word_tokenize(question)
+        #First do a title check and a person check
+        for i in range(len(names)):
+            if names[i][1] == 'TITLE' and names[i][0][0].istitle():
+                if names[i+1][0][0].istitle():
+                    ans = names[i][0] + ' ' + names[i+1][0] + '.'
+                    break
+            elif names[i][1] == 'PERSON':
+                ans = names[i][0] + '.'
+
+        #If NER does not recognize named entities, check for capitalized names
+        for i in range(len(names)):
+            if names[i][0][0].istitle() and names[i][0] not in q_tokens:
+                ans = names[i][0]
+
+        if ans == '':
+            ans = 'NONEFOUND'
+
+        return ans
 
 
 

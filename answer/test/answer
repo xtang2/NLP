@@ -23,7 +23,7 @@ bi = bi.Ans_Binary()
 wh = wa.Wh_Answer()
 np = sp.StanfordNLP()
 
-wh_words = ['what', 'where', 'who', 'when', 'why']
+wh_words = ['what', 'where', 'who', 'when', 'why', 'which']
 aux_words = ["am", "are", "is", "was", "were",
              "does", "did", "has", "had", "may", "might", "must",
              "need", "ought", "shall", "should", "will", "would"]
@@ -153,7 +153,7 @@ def main():
             else:
                 found = False
                 for relevant in relevant_list:
-                    if wh_root == 'what':
+                    if wh_root == 'what' or wh_root == 'which':
                         ans = wh.what_answer(question, relevant)
                     if wh_root == 'why':
                         ans = question + ' Because why not?'
@@ -162,13 +162,13 @@ def main():
                     if wh_root == 'where':
                         ans = wh.where_answer(question, relevant)
                     if wh_root == 'who':
-                        ans = question +' Subra Suresh.'
+                        ans = wh.ans_who(question,relevant)
                     if ans != "":
                         found = True
-                        answer_list.append(question + "\n " +  ans.capitalize())
+                        answer_list.append(ans.capitalize())
                         break
                 if not found:
-                    answer_list.append(question + str(relevant_list))
+                    answer_list.append(relevant_list[0])
 
 
            #  if wh_root == 'what':
