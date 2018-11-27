@@ -91,23 +91,17 @@ public class WHQuestionGenerator {
 
         personSet = new HashSet<>();
         locationSet = new HashSet<>();
+        // test some locations because the NER location detector is not very
+        // good
+        locationSet.add("Ineb-Hedg");
+        locationSet.add("Saqqara");
 
         // System.out.println(sentence);
         // if begin position is 0 and if it is after a comma, we put who infront
         for (CoreLabel elem : doc.tokens()) {
 
             if (elem.ner().equals("PERSON")) {
-                // if the PERSON's name is after the comma, or if it is the
-                // start of the sentence
-                // int index = elem.index();
-                // if (index == 1 || doc.tokens().get(index -
-                // 2).word().equals(",")) {
                 personSet.add(elem.word());
-
-                // System.out.println(elem.word());
-                // System.out.println(elem.ner());
-                // System.out.println(elem.index());
-                // }
             }
 
             if (elem.ner().equals("LOCATION")) {
@@ -125,7 +119,6 @@ public class WHQuestionGenerator {
 
     private void process(String sentence) {
         HashMap<Integer, List<TypedDependency>> subjMap = new HashMap<>();
-//        System.out.println(sentence);
         // get the lemma of the sentence
         List<String> lemmatized = lemmatize(sentence, pipeline);
 
@@ -182,6 +175,20 @@ public class WHQuestionGenerator {
                 // System.out.println(startIndex);
 
                 predicates.add(predicate);
+
+                // Generate where questions
+
+                if (words[startIndex].equals("at")) {
+                    if (locationSet.contains(words[startIndex + 1])) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Where did ");
+                        sb.append(subj);
+                        sb.append(" ");
+                        sb.append(predicate);
+                        sb.append("?");
+                        result.add(sb.toString());
+                    }
+                }
 
                 if (subj.equals("which")) {
                     StringBuilder sb = new StringBuilder();
@@ -253,16 +260,6 @@ public class WHQuestionGenerator {
             }
 
         }
-
-        // generate where question
-//        for (String location : locationSet) {
-//            if (sentence.contains(location)) {
-//                System.out.println("location: "+ location);
-//                System.out.println(sentence);
-//                System.out.println();
-//
-//            }
-//        }
 
         // generate what question
         generateQuestion(subjIndexes, tdl, subjMap, subjects, predicates);
