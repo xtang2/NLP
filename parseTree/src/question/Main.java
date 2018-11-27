@@ -33,7 +33,7 @@ public class Main {
         // rank
         List<MySentence> list = rank(results);
 
-        for (int i = 0; i < limit; i++) {
+        for (int i = 0; i < limit && i < list.size(); i++) {
             System.out.println(list.get(i).content);
         }
 
