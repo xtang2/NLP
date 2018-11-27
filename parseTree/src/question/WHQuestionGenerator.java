@@ -60,6 +60,7 @@ public class WHQuestionGenerator {
     Set<String> escapeSet;
     Set<String> personSet;
     Set<String> locationSet;
+    Set<String> timeSet;
 
     public WHQuestionGenerator(String fileName, Set<String> escapeSet) {
         this.escapeSet = escapeSet;
@@ -91,6 +92,8 @@ public class WHQuestionGenerator {
 
         personSet = new HashSet<>();
         locationSet = new HashSet<>();
+        timeSet = new HashSet<>();
+
         // test some locations because the NER location detector is not very
         // good
         locationSet.add("Ineb-Hedg");
@@ -103,12 +106,17 @@ public class WHQuestionGenerator {
             if (elem.ner().equals("PERSON")) {
                 personSet.add(elem.word());
             }
-
             if (elem.ner().equals("LOCATION")) {
                 locationSet.add(elem.word());
             }
+            if (elem.ner().equals("DATE")||elem.ner().equals("TIME")) {
+                timeSet.add(elem.word());
+            }
         }
 
+        for (String d : timeSet) {
+            System.out.println(d);
+        }
         for (String sentence : sentences) {
             if (sentence.contains("References")) {
                 break;
@@ -188,6 +196,27 @@ public class WHQuestionGenerator {
                         sb.append("?");
                         result.add(sb.toString());
                     }
+
+                }
+                // Generate when questions
+
+                if (sentence.contains("in") ||sentence.contains("on") ||sentence.contains("between") || sentence.contains("at")) {
+                    Set<String> set = new HashSet<>(Arrays.asList(new String[]{"in", "on", "at", "between", "from", "to"}));
+                    for(String time : timeSet) {
+                        for (String pp : set) {
+                            if (sentence.contains(pp + " " + time)) {
+                                StringBuilder sb = new StringBuilder();
+                                sb.append("When did ");
+                                sb.append(subj);
+                                sb.append(" ");
+                                sb.append(predicate);
+                                sb.append("?");
+//                                System.out.println("when questions ----"+ sb.toString());
+                                result.add(sb.toString());
+                            }
+                        }
+                    }
+
                 }
 
                 if (subj.equals("which")) {
