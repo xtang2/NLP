@@ -235,7 +235,7 @@ class Wh_Answer:
             phrases.append(tree)
         for child in tree:
             if type(child) is Tree:
-                list_of_phrases = find_S(self, child)
+                list_of_phrases = self.find_S(child)
                 if (len(list_of_phrases) > 0):
                     phrases.extend(list_of_phrases)
         return phrases
@@ -245,7 +245,7 @@ class Wh_Answer:
     
         r_out = Tree.fromstring(self.nlp.parse(relevent))    
         phrase_ans = []
-        phrases = find_S(r_out)
+        phrases = self.find_S(r_out)
             
         for tree in phrases:
             #print(tree.label())
@@ -264,7 +264,7 @@ class Wh_Answer:
                 verbP = ''
                 if subtree.label() == 'VP':
                     verbP = " " .join(subtree.leaves())            
-                for word in why_words:
+                for word in self.why_words:
                     if word in verbP:
                         found = True
                         location = verbP.find(word)
