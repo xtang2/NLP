@@ -169,8 +169,6 @@ class Wh_Answer:
         names = self.nlp.ner(relevant)
         locations = [w for (w,c) in names if c =='LOCATION']
 
-
-
     def where_answer(self, question, relevant):
         t = Tree.fromstring(self.nlp.parse(relevant))
 
@@ -241,12 +239,15 @@ class Wh_Answer:
         return phrases
     
     def why_answer(self, question, relevent):
+        #Get all nouns in the question
         Q_nouns = [tup[0] for tup in self.nlp.pos(question) if tup[1][0] == 'N']
-    
+        
+        #Find all phrases and sub phrases from the relevent sentence
         r_out = Tree.fromstring(self.nlp.parse(relevent))    
         phrase_ans = []
         phrases = self.find_S(r_out)
             
+        #For each phrase, find the NP and VP and parse out the nouns in the NP
         for tree in phrases:
             #print(tree.label())
             #print(tree.leaves())
@@ -258,12 +259,14 @@ class Wh_Answer:
                     nounP = " ".join(subtree.leaves())
                     R_nouns = [tup[0] for tup in self.nlp.pos(nounP) if tup[1][0] == 'N']
                     for noun in R_nouns:
+                        #If nouns in the subphrase are not in the question, we are in the wrong phrase, append wrong phrase and skip the current phrase
                         if noun not in Q_nouns:
                             phrase_ans.append('WrongPhrase')
                             break
                 verbP = ''
                 if subtree.label() == 'VP':
-                    verbP = " " .join(subtree.leaves())            
+                    verbP = " " .join(subtree.leaves())   
+                #If we find an instance of a "Why" word, find the position and return the string starting from that position.
                 for word in self.why_words:
                     if word in verbP:
                         found = True
@@ -271,17 +274,19 @@ class Wh_Answer:
                         verbP = verbP[location:]
                         phrase_ans.append(verbP.capitalize())
                         break
-                
+            
+            #If there was no phrase, append WrongPhrase
             if found == False:
                 phrase_ans.append('WrongPhrase')
                 
         ans = ''
+        #Check all the answers in phrase answers, the correct answer is the one that is not from a Wrong Phrase
         for answer in phrase_ans:
             if answer != 'WrongPhrase':
                 ans = answer + '.'
         
         if ans == '':
-            return 'No answer found.'
+            return relevent
         else:
             return ans
     
