@@ -165,11 +165,6 @@ class Wh_Answer:
         return ""
 
 
-    def location_answer(self, q_tokens, relevant):
-        names = self.nlp.ner(relevant)
-        locations = [w for (w,c) in names if c =='LOCATION']
-
-
 
     def where_answer(self, question, relevant):
         t = Tree.fromstring(self.nlp.parse(relevant))
@@ -196,6 +191,9 @@ class Wh_Answer:
                 if ans != "":
                     return ans
         return ""
+
+    def when_answer(self, question, relevant):
+        return self.where_answer(question,relevant)
 
     def ans_who(self, question, relevent):
         names = self.nlp.ner(relevent)

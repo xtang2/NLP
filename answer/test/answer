@@ -158,7 +158,7 @@ def main():
                     if wh_root == 'why':
                         ans = question + ' Because why not?'
                     if wh_root == 'when':
-                        ans = question + ' Any time is a good time!'
+                        ans = wh.when_answer(question,relevant)
                     if wh_root == 'where':
                         ans = wh.where_answer(question, relevant)
                     if wh_root == 'who':
