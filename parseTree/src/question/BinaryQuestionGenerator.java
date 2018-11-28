@@ -1,7 +1,18 @@
 package question;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Scanner;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
@@ -20,9 +31,9 @@ import edu.stanford.nlp.trees.Tree;
  */
 public class BinaryQuestionGenerator {
 
-    static Set<String> auxiliaries = new HashSet<>(Arrays.asList(new String[] {"am", "are", "is", "was", "were",
-            "does", "did", "has", "had", "may", "might", "must",
-            "need", "ought", "shall", "should", "will", "would"}));
+    static Set<String> auxiliaries = new HashSet<>(
+            Arrays.asList(new String[] { "am", "are", "is", "was", "were", "does", "did", "has", "had", "may", "might",
+                    "must", "need", "ought", "shall", "should", "will", "would" }));
 
     static List<String> sentences = new ArrayList<>();
 
@@ -57,12 +68,11 @@ public class BinaryQuestionGenerator {
             }
             process(sentence);
         }
-//        System.out.println("processed : " + count + " sentences.");
+        // System.out.println("processed : " + count + " sentences.");
     }
 
-
     private void process(String sentence) {
-//        System.out.println(sentence);
+        // System.out.println(sentence);
 
         Tree tree = parser.parse(sentence);
 
@@ -89,11 +99,9 @@ public class BinaryQuestionGenerator {
 
                         // check escape words
                         String[] tmp = firstHalf.split("\\s");
-                        if(escapeSet.contains(tmp[0])) {
+                        if (escapeSet.contains(tmp[0])) {
                             continue;
                         }
-
-
 
                         String question = auxiliaryVerb + " " + firstHalf + " " + lastHalf.trim() + "?";
                         question = question.replaceAll(" ,", ",");
@@ -102,10 +110,10 @@ public class BinaryQuestionGenerator {
 
                         result.add(question);
 
-//                        System.out.println(sentence);
-//                        System.out.println(sentence);
-//                        System.out.println(tree.score());
-//                        System.out.println();
+                        // System.out.println(sentence);
+                        // System.out.println(sentence);
+                        // System.out.println(tree.score());
+                        // System.out.println();
                     }
                 } else {
                     verbTags.put(word, leaf.parent(tree).label().value());
@@ -113,7 +121,6 @@ public class BinaryQuestionGenerator {
             }
 
         }
-
 
         // 2. if there's no auxiliary verb
         if (auxiliaryVerb.equals("")) {
@@ -128,16 +135,17 @@ public class BinaryQuestionGenerator {
                     }
                 }
                 if (sentence.endsWith(" .")) {
-                    sentence = sentence.substring(0, sentence.length()-1);
+                    sentence = sentence.substring(0, sentence.length() - 1);
                 }
                 if (!auxiliaryVerb.equals("")) {
-                    String question = auxiliaryVerb + " " + sentence.trim() + "?";
+                    String question = auxiliaryVerb + " " + sentence.trim().toLowerCase() + "?";
                     question = question.replaceAll(" ,", ",");
                     question = question.replaceAll(" '", "'");
                     question = question.replaceAll(" \\.", ".");
                     result.add(question);
                 }
-//                System.out.println("Question: " + auxiliaryVerb + " " + sentence);
+                // System.out.println("Question: " + auxiliaryVerb + " " +
+                // sentence);
             }
         }
     }
@@ -163,16 +171,15 @@ public class BinaryQuestionGenerator {
                 sb.append(leaves.get(i).value()).append(" ");
             }
         }
-        return sb.toString().substring(0, sb.length()-1);
+        return sb.toString().substring(0, sb.length() - 1);
     }
-
 
     public Tree findChildAfter(Tree parent, Tree target) {
         Tree[] children = parent.children();
         for (int i = 0; i < children.length; i++) {
             if (children[i] == target) {
                 if ((i + 1) < children.length) {
-                    return children[i+1];
+                    return children[i + 1];
                 } else {
                     return null;
                 }
@@ -180,7 +187,6 @@ public class BinaryQuestionGenerator {
         }
         return null;
     }
-
 
     public void loadFile(String fileName) {
         Scanner fileInput = null;
@@ -202,7 +208,6 @@ public class BinaryQuestionGenerator {
             sentences.add(sentenceString);
         }
     }
-
 
     public List<String> getResult() {
         return result;

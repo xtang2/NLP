@@ -109,14 +109,11 @@ public class WHQuestionGenerator {
             if (elem.ner().equals("LOCATION")) {
                 locationSet.add(elem.word());
             }
-            if (elem.ner().equals("DATE")||elem.ner().equals("TIME")) {
+            if (elem.ner().equals("DATE") || elem.ner().equals("TIME")) {
                 timeSet.add(elem.word());
             }
         }
 
-        for (String d : timeSet) {
-            System.out.println(d);
-        }
         for (String sentence : sentences) {
             if (sentence.contains("References")) {
                 break;
@@ -200,9 +197,11 @@ public class WHQuestionGenerator {
                 }
                 // Generate when questions
 
-                if (sentence.contains("in") ||sentence.contains("on") ||sentence.contains("between") || sentence.contains("at")) {
-                    Set<String> set = new HashSet<>(Arrays.asList(new String[]{"in", "on", "at", "between", "from", "to"}));
-                    for(String time : timeSet) {
+                if (sentence.contains("in") || sentence.contains("on") || sentence.contains("between")
+                        || sentence.contains("at")) {
+                    Set<String> set = new HashSet<>(
+                            Arrays.asList(new String[] { "in", "on", "at", "between", "from", "to" }));
+                    for (String time : timeSet) {
                         for (String pp : set) {
                             if (sentence.contains(pp + " " + time)) {
                                 StringBuilder sb = new StringBuilder();
@@ -211,7 +210,8 @@ public class WHQuestionGenerator {
                                 sb.append(" ");
                                 sb.append(predicate);
                                 sb.append("?");
-//                                System.out.println("when questions ----"+ sb.toString());
+                                // System.out.println("when questions ----"+
+                                // sb.toString());
                                 result.add(sb.toString());
                             }
                         }
@@ -260,7 +260,6 @@ public class WHQuestionGenerator {
             sb.append("Who ");
             String subString = sentence.substring(indexWho + 4, sentence.length() - 2);
             sb.append(subString);
-            sb.append("?");
 
             String question = sb.toString().trim() + "?";
             question = question.replaceAll(" ,", ",");
