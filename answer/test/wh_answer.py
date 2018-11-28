@@ -324,14 +324,14 @@ class Wh_Answer:
             if found == False:
                 phrase_ans.append('WrongPhrase')
 
-        ans = ''
+        ans = ""
         #Check all the answers in phrase answers, the correct answer is the one that is not from a Wrong Phrase
         for answer in phrase_ans:
             if answer != 'WrongPhrase':
                 ans = answer + '.'
 
-        if ans == '':
-            return relevant
+        if ans == "":
+            return ""
         else:
             return ans
 
