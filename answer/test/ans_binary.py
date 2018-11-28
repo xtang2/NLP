@@ -15,8 +15,7 @@ class Ans_Binary:
     
     def __init__(self):
         self.np = sp.StanfordNLP()
-        self.lm = WordNetLemmatizer()
-        
+        self.lm = WordNetLemmatizer()        
     
     def ans_binary(self, question, relevent):
         q_pos = self.np.pos(question)[1:-1]

@@ -3,6 +3,7 @@
 from nltk.parse.corenlp import CoreNLPParser
 from nltk.parse.corenlp import CoreNLPDependencyParser
 from nltk.stem.porter import *
+from nltk.stem import WordNetLemmatizer
 from stanfordcorenlp import StanfordCoreNLP
 from queue import Queue
 from nltk.tree import Tree
@@ -17,6 +18,8 @@ class Wh_Answer:
         self.nlp = sp.StanfordNLP()
         self.stemmer = PorterStemmer()
         self.snlp = spacy.load('en_core_web_sm')
+        self.lm = WordNetLemmatizer()
+        
 
     # #text = "Egyptians in this era worshipped their Pharaoh as a god, believing that he ensured the annual flooding of the Nile that was necessary for their crops."
     # text = "The cat did eat the cake."
@@ -201,36 +204,67 @@ class Wh_Answer:
                 if ans != "":
                     return ans
         return ""
+    
+    def find_stem(self, doc):
+        nkey = ''
+        vstem = ''
+        npos = ''
+        for token in doc:
+            #print (token.text, token.pos_, token.dep_, token.head.dep_)
+            if (token.dep_ == 'nsubj' or token.dep_ == 'nsubjpass') and token.head.dep_ == 'ROOT':
+                nkey = token.text
+                #nstem = stemmer.stem(nkey)
+                npos = token.pos_
+            if token.dep_ == 'ROOT' and token.pos_ == 'VERB':
+                root = token.head.text
+                vstem = self.lm.lemmatize(root,'v')
+        return nkey, vstem, npos
 
     def who_answer(self, question, relevant):
-        return self.where_answer(question,relevant)
-
-    def who_answer(self, question, relevant):
-        names = self.nlp.ner(relevant)
-
+        ques = self.snlp(question)
+        rele = self.snlp(relevant)
+        
+        q_nstem, q_vstem, q_npos = self.find_stem(ques)
+        r_nstem, r_vstem, r_npos = self.find_stem(rele)
+        
         ans = ''
-        q_tokens = self.nlp.word_tokenize(question)
-        #First do a title check and a person check
-        for i in range(len(names)):
-            if names[i][1] == 'TITLE' and names[i][0][0].istitle():
-                if names[i+1][0][0].istitle():
-                    ans = names[i][0] + ' ' + names[i+1][0] + '.'
-                    break
-                elif names[i][0][0].istitle():
-                    ans = 'The ' + names[i][0] + '.'
-                    break
-            elif names[i][1] == 'PERSON':
-                ans = names[i][0] + '.'
+        if r_vstem == q_vstem:
+            ans = r_nstem
+        
+        if ans != '':
+            return ans + '.'
+        else:
+            return relevant
 
-        #If NER does not recognize named entities, check for capitalized names
-        for i in range(len(names)):
-            if names[i][0][0].istitle() and names[i][0] not in q_tokens:
-                ans = names[i][0]
-
-        if ans == '':
-            ans = 'NONEFOUND'
-
-        return ans
+#    def who_answer(self, question, relevant):
+#        return self.where_answer(question,relevant)
+#
+#    def who_answer(self, question, relevant):
+#        names = self.nlp.ner(relevant)
+#
+#        ans = ''
+#        q_tokens = self.nlp.word_tokenize(question)
+#        #First do a title check and a person check
+#        for i in range(len(names)):
+#            if names[i][1] == 'TITLE' and names[i][0][0].istitle():
+#                if names[i+1][0][0].istitle():
+#                    ans = names[i][0] + ' ' + names[i+1][0] + '.'
+#                    break
+#                elif names[i][0][0].istitle():
+#                    ans = 'The ' + names[i][0] + '.'
+#                    break
+#            elif names[i][1] == 'PERSON':
+#                ans = names[i][0] + '.'
+#
+#        #If NER does not recognize named entities, check for capitalized names
+#        for i in range(len(names)):
+#            if names[i][0][0].istitle() and names[i][0] not in q_tokens:
+#                ans = names[i][0]
+#
+#        if ans == '':
+#            ans = 'NONEFOUND'
+#
+#        return ans
 
     why_words = ['because', 'since', 'therefore', 'as a result of', 'as long as',
              'by reason of', 'by virtue of', 'considering', 'due to', 'for the reason that',
