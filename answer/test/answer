@@ -145,7 +145,6 @@ def main():
         elif ans_type(question) == 'Wh':
             #Do something depending on what type of question it is
             wh_root = determine_wh(question)
-
             relevant_list = find_releventS(sentences, question)
             if relevant_list is None:
                 found = False
@@ -155,21 +154,23 @@ def main():
                 for relevant in relevant_list:
                     if wh_root == 'what' or wh_root == 'which':
                         ans = wh.what_answer(question, relevant)
-                    if wh_root == 'why':
+                    elif wh_root == 'why':
                         ans = wh.why_answer(question, relevant)
-                    if wh_root == 'when':
+                    elif wh_root == 'when':
                         ans = wh.when_answer(question,relevant)
-                    if wh_root == 'where':
+                    elif wh_root == 'where':
                         ans = wh.where_answer(question, relevant)
-                    if wh_root == 'who':
+                    elif wh_root == 'who' or wh_root == 'how':
                         ans = wh.who_answer(question,relevant)
+                    #Unrecognized "wh" root
+                    else:
+                        ans = ""
                     if ans != "":
                         found = True
                         answer_list.append(ans.capitalize())
                         break
                 if not found:
                     answer_list.append(relevant_list[0])
-
 
            #  if wh_root == 'what':
            #      relevant_list = find_releventJ(path,question)
@@ -190,7 +191,6 @@ def main():
            #  elif wh_root == 'when':
            #      answer_list.append('Any time is a good time!')
            #  elif wh_root == 'where':
-
            #  elif wh_root == 'who':
            #      answer_list.append('Subra Suresh.')
     for answer in answer_list:

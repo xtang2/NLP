@@ -38,7 +38,6 @@ class Wh_Answer:
     #     if token.dep_ == 'ROOT':
     #         root = token.text
 
-
     # parser = CoreNLPParser(url='http://localhost:9000')
     # parse = parser.raw_parse(text)
     #depparse = nlp.dependency_parse("Who did Ehyptians in this era worship?")
@@ -47,7 +46,6 @@ class Wh_Answer:
     # strategy for who, what questions:
     # look for NP be NP, match either of them and return the unmatched one
     # this assumes that the question doesn't come in the form of NP,NP,blah! (that might be for later)
-
 
     # keyphrase = root
     # keystem = stemmer.stem(keyphrase)
@@ -91,7 +89,7 @@ class Wh_Answer:
         for s in self.getAll("S", t)[::-1]:
            for components in s:
               componentStem = [self.stemmer.stem(w) for w in components.leaves()]
-              if keystem in componentStem:
+              if keyphrase in componentStem:
                   if components.label() == "VP":
                       # print(components)
                       npchildren = [c for c in components if c.label() == "NP"]
@@ -206,7 +204,7 @@ class Wh_Answer:
         return ""
 
     def when_answer(self,question,relevant):
-        return self.where_answer(question,relevanT)
+        return self.where_answer(question,relevant)
 
     def find_stem(self, doc):
         nkey = ''
@@ -230,14 +228,14 @@ class Wh_Answer:
         q_nstem, q_vstem, q_npos = self.find_stem(ques)
         r_nstem, r_vstem, r_npos = self.find_stem(rele)
 
-        ans = ''
+        ans = ""
         if r_vstem == q_vstem:
             ans = r_nstem
 
-        if ans != '':
-            return ans + '.'
+        if ans != "":
+            return ans + "."
         else:
-            return relevant
+            return ""
 
 #    def who_answer(self, question, relevant):
 #        return self.where_answer(question,relevant)
@@ -326,14 +324,14 @@ class Wh_Answer:
             if found == False:
                 phrase_ans.append('WrongPhrase')
 
-        ans = ''
+        ans = ""
         #Check all the answers in phrase answers, the correct answer is the one that is not from a Wrong Phrase
         for answer in phrase_ans:
             if answer != 'WrongPhrase':
                 ans = answer + '.'
 
-        if ans == '':
-            return relevant
+        if ans == "":
+            return ""
         else:
             return ans
 
