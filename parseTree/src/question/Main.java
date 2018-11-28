@@ -43,6 +43,14 @@ public class Main {
             System.out.println(list.get(i).content);
         }
 
+        if (limit > list.size() && !list.isEmpty()) {
+            int i = list.size();
+            while (i < limit) {
+                System.out.println(list.get(0).content);
+                i++;
+            }
+        }
+
     }
 
     private static List<MySentence> rank(List<String> results) throws IOException {
