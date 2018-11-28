@@ -72,6 +72,18 @@ class Wh_Answer:
                     elems += self.getAllWords(label,subtree)
             return elems
 
+    def getAtLevel(self,i,t):
+        if i <= 0:
+            return [t]
+        else:
+            if type(t) == str:
+                return []
+            else:
+                elems = []
+                for subtree in t:
+                    elems += self.getAtLevel(i-1,subtree)
+                return elems
+
     def what_answer_s(self,keyphrase, t):
         for s in self.getAll("S", t)[::-1]:
            for components in s:
