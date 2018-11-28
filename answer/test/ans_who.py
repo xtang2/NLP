@@ -18,7 +18,6 @@ class Ans_Who:
 
     def who_answer(self, question, relevant):
         names = self.nlp.ner(relevant)
-
         ans = ''
         q_tokens = self.nlp.word_tokenize(question)
         #First do a title check and a person check
