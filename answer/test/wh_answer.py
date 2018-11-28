@@ -19,7 +19,7 @@ class Wh_Answer:
         self.stemmer = PorterStemmer()
         self.snlp = spacy.load('en_core_web_sm')
         self.lm = WordNetLemmatizer()
-        
+
 
     # #text = "Egyptians in this era worshipped their Pharaoh as a god, believing that he ensured the annual flooding of the Nile that was necessary for their crops."
     # text = "The cat did eat the cake."
@@ -204,7 +204,10 @@ class Wh_Answer:
                 if ans != "":
                     return ans
         return ""
-    
+
+    def when_answer(self,question,relevant):
+        return self.where_answer(question,relevanT)
+
     def find_stem(self, doc):
         nkey = ''
         vstem = ''
@@ -223,14 +226,14 @@ class Wh_Answer:
     def who_answer(self, question, relevant):
         ques = self.snlp(question)
         rele = self.snlp(relevant)
-        
+
         q_nstem, q_vstem, q_npos = self.find_stem(ques)
         r_nstem, r_vstem, r_npos = self.find_stem(rele)
-        
+
         ans = ''
         if r_vstem == q_vstem:
             ans = r_nstem
-        
+
         if ans != '':
             return ans + '.'
         else:
