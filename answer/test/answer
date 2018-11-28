@@ -6,6 +6,9 @@ Created on Sun Oct 28 14:07:28 2018
 @author: leonshi
 """
 
+import warnings
+warnings.filterwarnings("ignore")
+
 import sys
 from textblob import TextBlob
 from nltk.metrics.distance import jaccard_distance
@@ -133,14 +136,17 @@ def main():
                 answer_list.append('No')
             else:
                 for relevent in relevent_list:
+                    #print(relevent)
                     #Answering question using binary answering module class
                     score = bi.ans_binary(question, relevent)
                     scores.append(score)
                 for score in scores:
+                    #print(score)
                     if score == 1:
                         found = True
-                        answer_list.append('Yes')
-                if not found:
+                if found:
+                    answer_list.append('Yes')
+                else:
                     answer_list.append('No')
         elif ans_type(question) == 'Wh':
             #Do something depending on what type of question it is

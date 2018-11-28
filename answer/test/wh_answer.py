@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 
-from nltk.parse.corenlp import CoreNLPParser
-from nltk.parse.corenlp import CoreNLPDependencyParser
 from nltk.stem.porter import *
 from nltk.stem import WordNetLemmatizer
-from stanfordcorenlp import StanfordCoreNLP
-from queue import Queue
 from nltk.tree import Tree
 import spacy
-import sys
-import json
 import SCNLP as sp
 
 class Wh_Answer:
