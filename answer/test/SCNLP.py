@@ -17,7 +17,7 @@ import logging
 import json
 
 class StanfordNLP:
-    def __init__(self, host='http://localhost', port=9000):
+    def __init__(self, host='http://localhost', port=8889):
         self.nlp = StanfordCoreNLP(host, port=port,
                                    timeout=30000)  # , quiet=False, logging_level=logging.DEBUG)
         self.props = {
