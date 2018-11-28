@@ -8,10 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.languagetool.JLanguageTool;
-import org.languagetool.Language;
-import org.languagetool.rules.RuleMatch;
-
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
 /**
@@ -19,7 +15,7 @@ import edu.stanford.nlp.util.logging.RedwoodConfiguration;
  */
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         String fileName = args[0];
         int limit = Integer.parseInt(args[1]);
         RedwoodConfiguration.current().clear().apply();
@@ -53,10 +49,7 @@ public class Main {
 
     }
 
-    private static List<MySentence> rank(List<String> results) throws IOException {
-
-        JLanguageTool langTool = new JLanguageTool(Language.getLanguageForName("English"));
-        langTool.activateDefaultPatternRules();
+    private static List<MySentence> rank(List<String> results){
 
         List<MySentence> list = new ArrayList<>();
         for (String r : results) {
@@ -67,22 +60,6 @@ public class Main {
             if (r.length() > 120 || r.length() < 25) {
                 sen.decrease(5);
             }
-
-            // check spelling and grammar
-            List<RuleMatch> matches = langTool.check(r);
-            int errCnt = 0;
-            for (RuleMatch match : matches) {
-                // System.out.println("Potential error at line " +
-                // match.getEndLine() + ", column " +
-                // match.getColumn() + ": " + match.getMessage());
-                // System.out.println("Suggested correction: " +
-                // match.getSuggestedReplacements());
-                if (!match.getSuggestedReplacements().isEmpty()
-                        && !match.getSuggestedReplacements().get(0).equals(",")) {
-                    errCnt++;
-                }
-            }
-            sen.decrease(errCnt);
 
             // who is a good question
             if (r.startsWith("Who")) {
