@@ -14,7 +14,6 @@ class Wh_Answer:
         self.snlp = spacy.load('en_core_web_sm')
         self.lm = WordNetLemmatizer()
 
-
     # #text = "Egyptians in this era worshipped their Pharaoh as a god, believing that he ensured the annual flooding of the Nile that was necessary for their crops."
     # text = "The cat did eat the cake."
     # q = "What did the cat eat?"
