@@ -37,8 +37,8 @@ class Ans_Binary:
                     sim = self.word_sim(word, r_word, q_tag, r_tg)           
                     if (sim or word == r_word) and tag[0:2] == r_tag[0:2]:
                         exist = True
-                    if (tag == 'VB' or r_tag == 'VB') and ('VB' in tag or 'VB' in r_tag):
-                        exist = True
+                    #if (tag == 'VB' or r_tag == 'VB') and ('VB' in tag or 'VB' in r_tag):
+                    #    exist = True
                     #else:
                         #if word == r_word and tag[0:2] == r_tag[0:2]:
                             #exist = True
