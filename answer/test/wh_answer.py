@@ -206,7 +206,7 @@ class Wh_Answer:
         return ""
 
     def when_answer(self,question,relevant):
-        return self.where_answer(question,relevanT)
+        return self.where_answer(question,relevant)
 
     def find_stem(self, doc):
         nkey = ''
