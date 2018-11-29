@@ -20,13 +20,13 @@ class Ans_Binary:
     def ans_binary(self, question, relevent):
         q_pos = self.np.pos(question)[1:-1]
         r_pos = self.np.pos(relevent)
-        check = []
         
-        for word, tag in q_pos:  
+        check = []
+        for word, tag in q_pos:    
             exist = False
             q_tag = self.get_pos(tag[0].lower())
             if (q_tag == 'n' or q_tag == 'v' or q_tag == 'a' or q_tag == 'r'):
-                #print(word + ' ' + tag)
+                print(word + ' ' + tag)
                 for r_word, r_tag in r_pos:
                     r_tg = self.get_pos(r_tag)
                     if (r_tg == 'n' or r_tg== 'v' or r_tg == 'j' or r_tg == 'r'):
@@ -42,7 +42,6 @@ class Ans_Binary:
                     #else:
                         #if word == r_word and tag[0:2] == r_tag[0:2]:
                             #exist = True
-                #print(exist)
                 check.append(exist)
         percentage = sum(check)/len(check)
         return percentage           
