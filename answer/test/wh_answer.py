@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 
-from nltk.parse.corenlp import CoreNLPParser
-from nltk.parse.corenlp import CoreNLPDependencyParser
 from nltk.stem.porter import *
 from nltk.stem import WordNetLemmatizer
-from stanfordcorenlp import StanfordCoreNLP
-from queue import Queue
 from nltk.tree import Tree
 import spacy
-import sys
-import json
 import SCNLP as sp
 
 class Wh_Answer:
@@ -19,7 +13,6 @@ class Wh_Answer:
         self.stemmer = PorterStemmer()
         self.snlp = spacy.load('en_core_web_sm')
         self.lm = WordNetLemmatizer()
-
 
     # #text = "Egyptians in this era worshipped their Pharaoh as a god, believing that he ensured the annual flooding of the Nile that was necessary for their crops."
     # text = "The cat did eat the cake."
